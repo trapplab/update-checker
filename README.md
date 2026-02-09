@@ -12,6 +12,36 @@ Minimal Flutter starter template with i18n (5 languages), three build flavors (G
 flutter run --flavor github
 ```
 
+## Using a Local Flutter SDK
+
+Instead of relying on a system-wide Flutter installation, you can pin an exact Flutter version by adding it as a git submodule inside the project:
+
+```bash
+# Add Flutter as a submodule (pick a stable tag)
+git submodule add -b stable https://github.com/flutter/flutter.git flutter
+
+# Pin to a specific version
+cd flutter && git checkout 3.29.3 && cd ..
+git add flutter
+git commit -m "Pin Flutter SDK to 3.29.3"
+```
+
+Then use the local binary everywhere instead of the global `flutter` command:
+
+```bash
+./flutter/bin/flutter pub get
+./flutter/bin/flutter run --flavor github
+./flutter/bin/flutter build apk --flavor github --release
+```
+
+This ensures all developers and CI use the identical SDK version. The `prepare_flavor.sh` script auto-detects a local `./flutter/bin/flutter` if present and uses it instead of the system binary. To enable this, the CI workflow can check out submodules:
+
+```yaml
+- uses: actions/checkout@v4
+  with:
+    submodules: true
+```
+
 ## Customize This Template
 
 ### 1. Rename the project
