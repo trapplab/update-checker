@@ -1,0 +1,2 @@
+json_key_file("fastlane/supply.json")
+package_name("com.example.sample_app")

@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+# Check version consistency between pubspec.yaml and Changelog.md
+git diff --cached --name-only | grep -qE "(pubspec\.yaml|Changelog.md)" && {
+  echo "Checking version consistency..."
+
+  PUBSPEC_VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: //' | sed 's/+.*//' | tr -d ' ')
+  CHANGELOG_VERSION=$(grep -E "^## \[" Changelog.md | head -1 | sed 's/## \[//' | sed 's/\]//' | tr -d ' ')
+
+  if [ "$PUBSPEC_VERSION" != "$CHANGELOG_VERSION" ]; then
+    echo "Version mismatch!"
+    echo "  pubspec.yaml:  $PUBSPEC_VERSION"
+    echo "  Changelog.md:  $CHANGELOG_VERSION"
+    exit 1
+  fi
+
+  echo "Version consistency check passed ($PUBSPEC_VERSION)"
+}
+
+# Check version consistency between all pubspec files
+git diff --cached --name-only | grep -qE "pubspec" && {
+  echo "Checking pubspec version consistency..."
+
+  PLAY_VERSION=$(grep "^version:" pubspec.play.yaml | sed 's/version: //' | tr -d ' ')
+  YAML_VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: //' | tr -d ' ')
+  FDROID_VERSION=$(grep "^version:" pubspec.fdroid.yaml | sed 's/version: //' | tr -d ' ')
+
+  if [ "$PLAY_VERSION" != "$YAML_VERSION" ] || [ "$PLAY_VERSION" != "$FDROID_VERSION" ]; then
+    echo "Version mismatch in pubspec files!"
+    echo "  pubspec.play.yaml:   $PLAY_VERSION"
+    echo "  pubspec.yaml:        $YAML_VERSION"
+    echo "  pubspec.fdroid.yaml: $FDROID_VERSION"
+    exit 1
+  fi
+
+  echo "Pubspec version consistency check passed ($PLAY_VERSION)"
+}
+
+# Generate changelog files when Changelog.md is staged
+if git diff --cached --name-only | grep -q "Changelog.md"; then
+  LATEST_VERSION=$(grep -m 1 "## \[" Changelog.md | sed 's/## \[\(.*\)\]/\1/')
+
+  IFS='.' read -ra VERSION_PARTS <<< "$LATEST_VERSION"
+  MAJOR=${VERSION_PARTS[0]}
+  MINOR=${VERSION_PARTS[1]}
+  PATCH=${VERSION_PARTS[2]}
+  VERSION_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
+
+  CHANGELOG_FILE="fastlane/metadata/android/en-US/changelogs/$VERSION_CODE.txt"
+
+  if [ -f "$CHANGELOG_FILE" ]; then
+    echo "Changelog files for version $LATEST_VERSION already exist."
+  else
+    echo "Changelog.md was modified. Generating changelog files..."
+
+    CHANGELOG_ENTRY=$(sed -n "/## \[$LATEST_VERSION\]/,/## \[/p" Changelog.md | sed '1d;$d' | sed 's/^### /## /')
+
+    ./update_changelogs_with_translation.sh "$LATEST_VERSION" "$CHANGELOG_ENTRY"
+
+    echo ""
+    echo "Changelog files generated. Aborting commit so you can stage all files together."
+    echo "  Run 'git add fastlane/metadata/android/*/changelogs/*.txt' and commit again."
+    echo ""
+    exit 1
+  fi
+fi
