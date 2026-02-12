@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:sample_app/l10n/app_localizations.dart';
+import 'package:update checker/l10n/app_localizations.dart';
 
-import 'package:sample_app/main.dart';
+import 'package:update checker/main.dart';
 
 void main() {
   testWidgets('HomePage displays hello world', (WidgetTester tester) async {
@@ -23,6 +23,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Hello World!'), findsOneWidget);
-    expect(find.text('Sample App'), findsOneWidget);
+    expect(find.text('Update Checker'), findsOneWidget);
   });
 }

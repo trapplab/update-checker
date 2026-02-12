@@ -1,5 +1,5 @@
-name: sample_app
-description: "A minimal Flutter starter app"
+name: update_checker
+description: "Check your mobiles end-of-life"
 publish_to: 'none'
 
 version: 0.1.0+100

@@ -33,3 +33,6 @@ The app is translated into multiple languages. To add a new language:
 1. Add `app_[lang].arb` to `lib/l10n/`
 2. Run `flutter gen-l10n`
 3. Add the new locale to `android/app/src/main/res/xml/locales_config.xml`
+
+## Documentation
+Plans are saved in the plan folder.
