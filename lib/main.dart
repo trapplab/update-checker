@@ -317,124 +317,103 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.appTitle)),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 200,
-              height: 200,
-              child: GestureDetector(
-                onTap: _status == EolStatus.loading ? null : _checkEol,
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        _buttonColor().withValues(alpha: 1.0),
-                        _buttonColor().withValues(alpha: 0.7),
-                      ],
-                    ),
-                    boxShadow: [
-                      // Primary shadow (bottom-right for depth)
-                      BoxShadow(
-                        color: _buttonColor().withValues(alpha: 0.5),
-                        blurRadius: 15,
-                        offset: const Offset(8, 8),
-                        spreadRadius: 2,
-                      ),
-                      // Highlight shadow (top-left for light effect)
-                      BoxShadow(
-                        color: Colors.white.withValues(alpha: 0.3),
-                        blurRadius: 10,
-                        offset: const Offset(-5, -5),
-                        spreadRadius: 0,
-                      ),
-                      // Ambient shadow for elevation
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                        spreadRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: _status == EolStatus.loading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(
-                            _brand.isNotEmpty
-                                ? _deviceLabel ?? l10n.deviceName(_brand, _model)
-                                : '...',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black26,
-                                  blurRadius: 2,
-                                  offset: Offset(1, 1),
-                                ),
-                              ],
-                            ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: GestureDetector(
+                    onTap: _status == EolStatus.loading ? null : _checkEol,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            _buttonColor().withValues(alpha: 1.0),
+                            _buttonColor().withValues(alpha: 0.7),
+                          ],
+                        ),
+                        boxShadow: [
+                          // Primary shadow (bottom-right for depth)
+                          BoxShadow(
+                            color: _buttonColor().withValues(alpha: 0.5),
+                            blurRadius: 15,
+                            offset: const Offset(8, 8),
+                            spreadRadius: 2,
                           ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              statusText,
-              style: TextStyle(color: statusColor),
-            ),
-            if (_eolDateRaw != null) ...[
-              const SizedBox(height: 4),
-              Text(l10n.eolDate(_formatDateLocale(_eolDateRaw, locale)!)),
-            ],
-            if (_isEstimated) ...[
-              const SizedBox(height: 4),
-              Text(
-                '(${l10n.estimated})',
-                style: const TextStyle(
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey,
-                ),
-              ),
-            ],
-            if (_status != EolStatus.unchecked &&
-                _status != EolStatus.loading &&
-                _status != EolStatus.unknown) ...[
-              const SizedBox(height: 16),
-              if (_checkingImage) ...[
-                const SizedBox(
-                  width: 300,
-                  height: 100,
-                  child: Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                          // Highlight shadow (top-left for light effect)
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: 0.3),
+                            blurRadius: 10,
+                            offset: const Offset(-5, -5),
+                            spreadRadius: 0,
+                          ),
+                          // Ambient shadow for elevation
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                            spreadRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: _status == EolStatus.loading
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : Text(
+                                _brand.isNotEmpty
+                                    ? _deviceLabel ?? l10n.deviceName(_brand, _model)
+                                    : '...',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black26,
+                                      blurRadius: 2,
+                                      offset: Offset(1, 1),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
-              ] else if (_timelineImageExists && _buildTimelineImageUrl() != null) ...[
-                Image.network(
-                  _buildTimelineImageUrl()!,
-                  width: 300,
-                  height: 100,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    debugPrint('Error loading timeline image: $error');
-                    return const SizedBox.shrink();
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return const SizedBox(
+                const SizedBox(height: 16),
+                Text(
+                  statusText,
+                  style: TextStyle(color: statusColor),
+                ),
+                if (_eolDateRaw != null) ...[
+                  const SizedBox(height: 4),
+                  Text(l10n.eolDate(_formatDateLocale(_eolDateRaw, locale)!)),
+                ],
+                if (_isEstimated) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    '(${l10n.estimated})',
+                    style: const TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+                if (_status != EolStatus.unchecked &&
+                    _status != EolStatus.loading &&
+                    _status != EolStatus.unknown) ...[
+                  const SizedBox(height: 16),
+                  if (_checkingImage) ...[
+                    const SizedBox(
                       width: 300,
                       height: 100,
                       child: Center(
@@ -444,29 +423,55 @@ class _HomePageState extends State<HomePage> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                       ),
-                    );
-                  },
+                    ),
+                    const SizedBox(height: 8),
+                  ] else if (_timelineImageExists && _buildTimelineImageUrl() != null) ...[
+                    Image.network(
+                      _buildTimelineImageUrl()!,
+                      width: 300,
+                      height: 100,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        debugPrint('Error loading timeline image: $error');
+                        return const SizedBox.shrink();
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return const SizedBox(
+                          width: 300,
+                          height: 100,
+                          child: Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  TextButton.icon(
+                    onPressed: _addToCalendar,
+                    icon: const Icon(Icons.calendar_today),
+                    label: Text(l10n.addToCalendar),
+                  ),
+                ],
+                const SizedBox(height: 32),
+                Text(
+                  l10n.exploreMobile,
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
+                FilledButton.icon(
+                  onPressed: _openBrowser,
+                  icon: const Icon(Icons.open_in_new),
+                  label: const Text('1000mobiles.info'),
+                ),
               ],
-              TextButton.icon(
-                onPressed: _addToCalendar,
-                icon: const Icon(Icons.calendar_today),
-                label: Text(l10n.addToCalendar),
-              ),
-            ],
-            const SizedBox(height: 32),
-            Text(
-              l10n.exploreMobile,
-              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
-            FilledButton.icon(
-              onPressed: _openBrowser,
-              icon: const Icon(Icons.open_in_new),
-              label: const Text('1000mobiles.info'),
-            ),
-          ],
+          ),
         ),
       ),
     );
