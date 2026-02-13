@@ -239,23 +239,66 @@ class _HomePageState extends State<HomePage> {
             SizedBox(
               width: 200,
               height: 200,
-              child: ElevatedButton(
-                onPressed: _status == EolStatus.loading ? null : _checkEol,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _buttonColor(),
-                  foregroundColor: Colors.white,
-                  shape: const CircleBorder(),
-                  padding: const EdgeInsets.all(24),
-                ),
-                child: _status == EolStatus.loading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        _brand.isNotEmpty
-                            ? _deviceLabel ?? l10n.deviceName(_brand, _model)
-                            : '...',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 16),
+              child: GestureDetector(
+                onTap: _status == EolStatus.loading ? null : _checkEol,
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        _buttonColor().withValues(alpha: 1.0),
+                        _buttonColor().withValues(alpha: 0.7),
+                      ],
+                    ),
+                    boxShadow: [
+                      // Primary shadow (bottom-right for depth)
+                      BoxShadow(
+                        color: _buttonColor().withValues(alpha: 0.5),
+                        blurRadius: 15,
+                        offset: const Offset(8, 8),
+                        spreadRadius: 2,
                       ),
+                      // Highlight shadow (top-left for light effect)
+                      BoxShadow(
+                        color: Colors.white.withValues(alpha: 0.3),
+                        blurRadius: 10,
+                        offset: const Offset(-5, -5),
+                        spreadRadius: 0,
+                      ),
+                      // Ambient shadow for elevation
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                        spreadRadius: 5,
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: _status == EolStatus.loading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            _brand.isNotEmpty
+                                ? _deviceLabel ?? l10n.deviceName(_brand, _model)
+                                : '...',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black26,
+                                  blurRadius: 2,
+                                  offset: Offset(1, 1),
+                                ),
+                              ],
+                            ),
+                          ),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 16),
