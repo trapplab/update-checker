@@ -194,6 +194,33 @@ class _HomePageState extends State<HomePage> {
     await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 
+  Future<void> _addToCalendar() async {
+    if (_brand.isEmpty) return;
+    final deviceName = _deviceLabel ?? _model;
+    if (deviceName.isEmpty) return;
+    // Convert label to slug: lowercase, spaces to hyphens, remove special chars
+    var slug = deviceName
+        .toLowerCase()
+        .replaceAll(' ', '-')
+        .replaceAll(RegExp(r'[^a-z0-9-]'), '');
+    if (_isEstimated) {
+      slug = '${slug}-est';
+    }
+    // Use webcal:// scheme to open directly in calendar app
+    final baseUrl = AppConfig.apiBaseUrl.replaceFirst('https://', '').replaceFirst('http://', '');
+    final url = Uri.parse('webcal://$baseUrl/calendar/${_brand.toLowerCase()}/$slug.ics');
+    try {
+      // platformDefault shows app chooser on Android
+      await launchUrl(url, mode: LaunchMode.platformDefault);
+    } catch (e) {
+      // Fallback to https if webcal is not supported
+      final httpsUrl = Uri.parse(
+        '${AppConfig.apiBaseUrl}/calendar/${_brand.toLowerCase()}/$slug.ics',
+      );
+      await launchUrl(httpsUrl, mode: LaunchMode.platformDefault);
+    }
+  }
+
   /// Format a date string using locale-aware formatting
   String? _formatDateLocale(String? dateString, Locale locale) {
     if (dateString == null) return null;
@@ -318,6 +345,16 @@ class _HomePageState extends State<HomePage> {
                   fontStyle: FontStyle.italic,
                   color: Colors.grey,
                 ),
+              ),
+            ],
+            if (_status != EolStatus.unchecked &&
+                _status != EolStatus.loading &&
+                _status != EolStatus.unknown) ...[
+              const SizedBox(height: 16),
+              TextButton.icon(
+                onPressed: _addToCalendar,
+                icon: const Icon(Icons.calendar_today),
+                label: Text(l10n.addToCalendar),
               ),
             ],
             const SizedBox(height: 32),

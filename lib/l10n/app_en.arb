@@ -23,5 +23,6 @@
       "model": { "type": "String" }
     }
   },
-  "estimated": "estimated"
+  "estimated": "estimated",
+  "addToCalendar": "Add to calendar"
 }

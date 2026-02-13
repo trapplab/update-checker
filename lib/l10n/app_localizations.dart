@@ -181,6 +181,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'estimated'**
   String get estimated;
+
+  /// No description provided for @addToCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to calendar'**
+  String get addToCalendar;
 }
 
 class _AppLocalizationsDelegate

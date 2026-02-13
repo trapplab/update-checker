@@ -50,4 +50,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get estimated => 'estimé';
+
+  @override
+  String get addToCalendar => 'Ajouter au calendrier';
 }
