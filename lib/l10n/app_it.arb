@@ -1,5 +1,26 @@
 {
   "@@locale": "it",
-  "appTitle": "App di esempio",
-  "helloWorld": "Ciao Mondo!"
+  "appTitle": "Update Checker",
+  "tapToCheck": "Tocca per verificare lo stato degli aggiornamenti",
+  "checkingStatus": "Verifica in corso...",
+  "statusUpdated": "Riceve ancora aggiornamenti",
+  "statusEolSoon": "Fine aggiornamenti tra meno di 6 mesi",
+  "statusEol": "Non riceve più aggiornamenti",
+  "statusUnknown": "Nessuna informazione trovata",
+  "eolDate": "Fine aggiornamenti: {date}",
+  "@eolDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "selectDevice": "Seleziona il tuo dispositivo",
+  "searchDevices": "Cerca...",
+  "exploreMobile": "Scopri altri dispositivi mobili su 1000mobiles.info",
+  "deviceName": "{brand} {model}",
+  "@deviceName": {
+    "placeholders": {
+      "brand": { "type": "String" },
+      "model": { "type": "String" }
+    }
+  }
 }

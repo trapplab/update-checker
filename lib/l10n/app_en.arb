@@ -1,5 +1,26 @@
 {
   "@@locale": "en",
   "appTitle": "Update Checker",
-  "helloWorld": "Hello World!"
+  "tapToCheck": "Tap to check update status",
+  "checkingStatus": "Checking...",
+  "statusUpdated": "Still receiving updates",
+  "statusEolSoon": "End of updates in less than 6 months",
+  "statusEol": "No longer receiving updates",
+  "statusUnknown": "No information found",
+  "eolDate": "End of updates: {date}",
+  "@eolDate": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "selectDevice": "Select your device",
+  "searchDevices": "Search...",
+  "exploreMobile": "Explore more mobile devices on 1000mobiles.info",
+  "deviceName": "{brand} {model}",
+  "@deviceName": {
+    "placeholders": {
+      "brand": { "type": "String" },
+      "model": { "type": "String" }
+    }
+  }
 }

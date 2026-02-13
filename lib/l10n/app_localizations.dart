@@ -110,11 +110,71 @@ abstract class AppLocalizations {
   /// **'Update Checker'**
   String get appTitle;
 
-  /// No description provided for @helloWorld.
+  /// No description provided for @tapToCheck.
   ///
   /// In en, this message translates to:
-  /// **'Hello World!'**
-  String get helloWorld;
+  /// **'Tap to check update status'**
+  String get tapToCheck;
+
+  /// No description provided for @checkingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking...'**
+  String get checkingStatus;
+
+  /// No description provided for @statusUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Still receiving updates'**
+  String get statusUpdated;
+
+  /// No description provided for @statusEolSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'End of updates in less than 6 months'**
+  String get statusEolSoon;
+
+  /// No description provided for @statusEol.
+  ///
+  /// In en, this message translates to:
+  /// **'No longer receiving updates'**
+  String get statusEol;
+
+  /// No description provided for @statusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'No information found'**
+  String get statusUnknown;
+
+  /// No description provided for @eolDate.
+  ///
+  /// In en, this message translates to:
+  /// **'End of updates: {date}'**
+  String eolDate(String date);
+
+  /// No description provided for @selectDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your device'**
+  String get selectDevice;
+
+  /// No description provided for @searchDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get searchDevices;
+
+  /// No description provided for @exploreMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore more mobile devices on 1000mobiles.info'**
+  String get exploreMobile;
+
+  /// No description provided for @deviceName.
+  ///
+  /// In en, this message translates to:
+  /// **'{brand} {model}'**
+  String deviceName(String brand, String model);
 }
 
 class _AppLocalizationsDelegate

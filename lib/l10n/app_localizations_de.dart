@@ -9,8 +9,43 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
-  String get appTitle => 'Beispiel-App';
+  String get appTitle => 'Update Checker';
 
   @override
-  String get helloWorld => 'Hallo Welt!';
+  String get tapToCheck => 'Tippen um Update-Status zu prüfen';
+
+  @override
+  String get checkingStatus => 'Wird geprüft...';
+
+  @override
+  String get statusUpdated => 'Erhält noch Updates';
+
+  @override
+  String get statusEolSoon => 'Update-Ende in weniger als 6 Monaten';
+
+  @override
+  String get statusEol => 'Erhält keine Updates mehr';
+
+  @override
+  String get statusUnknown => 'Keine Informationen gefunden';
+
+  @override
+  String eolDate(String date) {
+    return 'Update-Ende: $date';
+  }
+
+  @override
+  String get selectDevice => 'Gerät auswählen';
+
+  @override
+  String get searchDevices => 'Suchen...';
+
+  @override
+  String get exploreMobile =>
+      'Weitere Mobilgeräte auf 1000mobiles.info erkunden';
+
+  @override
+  String deviceName(String brand, String model) {
+    return '$brand $model';
+  }
 }

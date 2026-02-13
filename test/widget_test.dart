@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:update checker/l10n/app_localizations.dart';
-
-import 'package:update checker/main.dart';
+import 'package:update_checker/l10n/app_localizations.dart';
+import 'package:update_checker/main.dart';
 
 void main() {
-  testWidgets('HomePage displays hello world', (WidgetTester tester) async {
+  testWidgets('HomePage displays device check button', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: const [
@@ -22,7 +23,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Hello World!'), findsOneWidget);
     expect(find.text('Update Checker'), findsOneWidget);
+    expect(find.text('Tap to check update status'), findsOneWidget);
+    expect(find.text('Explore mobile'), findsOneWidget);
   });
 }

@@ -12,5 +12,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Update Checker';
 
   @override
-  String get helloWorld => 'Hello World!';
+  String get tapToCheck => 'Tap to check update status';
+
+  @override
+  String get checkingStatus => 'Checking...';
+
+  @override
+  String get statusUpdated => 'Still receiving updates';
+
+  @override
+  String get statusEolSoon => 'End of updates in less than 6 months';
+
+  @override
+  String get statusEol => 'No longer receiving updates';
+
+  @override
+  String get statusUnknown => 'No information found';
+
+  @override
+  String eolDate(String date) {
+    return 'End of updates: $date';
+  }
+
+  @override
+  String get selectDevice => 'Select your device';
+
+  @override
+  String get searchDevices => 'Search...';
+
+  @override
+  String get exploreMobile => 'Explore more mobile devices on 1000mobiles.info';
+
+  @override
+  String deviceName(String brand, String model) {
+    return '$brand $model';
+  }
 }
