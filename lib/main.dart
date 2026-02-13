@@ -49,9 +49,12 @@ class _HomePageState extends State<HomePage> {
   String _brand = '';
   String _model = '';
   String? _deviceLabel;
+  String? _manufacturer;
   EolStatus _status = EolStatus.unchecked;
   String? _eolDateRaw;
   bool _isEstimated = false;
+  bool _timelineImageExists = false;
+  bool _checkingImage = false;
 
   @override
   void initState() {
@@ -122,11 +125,15 @@ class _HomePageState extends State<HomePage> {
       final bool isEol = data['isEol'] ?? false;
       final String? eolFrom = data['eolFrom'];
       final String? label = data['label'] as String?;
+      final String? manufacturer = data['manufacturer'] as String?;
       final bool isEstimated = data['isEstimated'] ?? false;
 
-      // Update device label from API response
+      // Update device label and manufacturer from API response
       if (label != null && label.isNotEmpty) {
         _deviceLabel = label;
+      }
+      if (manufacturer != null && manufacturer.isNotEmpty) {
+        _manufacturer = manufacturer;
       }
 
       if (isEol) {
@@ -135,6 +142,7 @@ class _HomePageState extends State<HomePage> {
           _eolDateRaw = eolFrom;
           _isEstimated = isEstimated;
         });
+        _checkTimelineImage();
       } else if (eolFrom != null) {
         final eolDate = DateTime.tryParse(eolFrom);
         if (eolDate != null) {
@@ -156,12 +164,14 @@ class _HomePageState extends State<HomePage> {
             _isEstimated = isEstimated;
           });
         }
+        _checkTimelineImage();
       } else {
         setState(() {
           _status = EolStatus.updated;
           _eolDateRaw = null;
           _isEstimated = isEstimated;
         });
+        _checkTimelineImage();
       }
     } catch (e) {
       debugPrint('Error checking EOL: $e');
@@ -204,7 +214,7 @@ class _HomePageState extends State<HomePage> {
         .replaceAll(' ', '-')
         .replaceAll(RegExp(r'[^a-z0-9-]'), '');
     if (_isEstimated) {
-      slug = '${slug}-est';
+      slug = '$slug-est';
     }
     // Use webcal:// scheme to open directly in calendar app
     final baseUrl = AppConfig.apiBaseUrl.replaceFirst('https://', '').replaceFirst('http://', '');
@@ -227,6 +237,54 @@ class _HomePageState extends State<HomePage> {
     final dateTime = DateTime.tryParse(dateString);
     if (dateTime == null) return dateString;
     return DateFormat.yMd(locale.toString()).format(dateTime);
+  }
+
+  /// Convert label to URL-friendly slug
+  String _labelToSlug(String label) {
+    return label
+        .toLowerCase()
+        .replaceAll(' ', '-')
+        .replaceAll(RegExp(r'[^a-z0-9-]'), '');
+  }
+
+  /// Build the timeline image URL
+  String? _buildTimelineImageUrl() {
+    if (_manufacturer == null || _deviceLabel == null) return null;
+    final manufacturerSlug = _manufacturer!.toLowerCase();
+    final labelSlug = _labelToSlug(_deviceLabel!);
+    return '${AppConfig.apiBaseUrl}/timeline/$manufacturerSlug/$labelSlug.png';
+  }
+
+  /// Check if the timeline image exists
+  Future<void> _checkTimelineImage() async {
+    final imageUrl = _buildTimelineImageUrl();
+    if (imageUrl == null) {
+      setState(() {
+        _timelineImageExists = false;
+        _checkingImage = false;
+      });
+      return;
+    }
+
+    debugPrint('Timeline image URL: $imageUrl');
+    setState(() => _checkingImage = true);
+
+    try {
+      final response = await http.head(Uri.parse(imageUrl));
+      debugPrint('Timeline image check status: ${response.statusCode}');
+      if (!mounted) return;
+      setState(() {
+        _timelineImageExists = response.statusCode == 200;
+        _checkingImage = false;
+      });
+    } catch (e) {
+      debugPrint('Error checking timeline image: $e');
+      if (!mounted) return;
+      setState(() {
+        _timelineImageExists = false;
+        _checkingImage = false;
+      });
+    }
   }
 
   @override
@@ -351,6 +409,46 @@ class _HomePageState extends State<HomePage> {
                 _status != EolStatus.loading &&
                 _status != EolStatus.unknown) ...[
               const SizedBox(height: 16),
+              if (_checkingImage) ...[
+                const SizedBox(
+                  width: 300,
+                  height: 100,
+                  child: Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ] else if (_timelineImageExists && _buildTimelineImageUrl() != null) ...[
+                Image.network(
+                  _buildTimelineImageUrl()!,
+                  width: 300,
+                  height: 100,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    debugPrint('Error loading timeline image: $error');
+                    return const SizedBox.shrink();
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const SizedBox(
+                      width: 300,
+                      height: 100,
+                      child: Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+              ],
               TextButton.icon(
                 onPressed: _addToCalendar,
                 icon: const Icon(Icons.calendar_today),
