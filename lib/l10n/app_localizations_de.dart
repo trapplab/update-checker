@@ -41,11 +41,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get searchDevices => 'Suchen...';
 
   @override
-  String get exploreMobile =>
-      'Weitere Mobilgeräte auf 1000mobiles.info erkunden';
+  String get exploreMobile => 'Weitere Mobilgeräte erkunden';
 
   @override
   String deviceName(String brand, String model) {
     return '$brand $model';
   }
+
+  @override
+  String get estimated => 'geschätzt';
 }

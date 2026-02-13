@@ -167,7 +167,7 @@ abstract class AppLocalizations {
   /// No description provided for @exploreMobile.
   ///
   /// In en, this message translates to:
-  /// **'Explore more mobile devices on 1000mobiles.info'**
+  /// **'Explore more mobile devices'**
   String get exploreMobile;
 
   /// No description provided for @deviceName.
@@ -175,6 +175,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{brand} {model}'**
   String deviceName(String brand, String model);
+
+  /// No description provided for @estimated.
+  ///
+  /// In en, this message translates to:
+  /// **'estimated'**
+  String get estimated;
 }
 
 class _AppLocalizationsDelegate

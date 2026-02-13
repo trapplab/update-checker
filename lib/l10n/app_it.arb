@@ -15,12 +15,13 @@
   },
   "selectDevice": "Seleziona il tuo dispositivo",
   "searchDevices": "Cerca...",
-  "exploreMobile": "Scopri altri dispositivi mobili su 1000mobiles.info",
+  "exploreMobile": "Scopri altri dispositivi mobili",
   "deviceName": "{brand} {model}",
   "@deviceName": {
     "placeholders": {
       "brand": { "type": "String" },
       "model": { "type": "String" }
     }
-  }
+  },
+  "estimated": "stimato"
 }

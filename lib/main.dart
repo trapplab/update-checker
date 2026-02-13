@@ -4,24 +4,16 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 
 import 'l10n/app_localizations.dart';
+import 'config/config.dart';
 
 void main() {
   runApp(const ThousandMobilesApp());
 }
 
 enum EolStatus { unchecked, loading, updated, eolSoon, eol, unknown }
-
-String _slugify(String input) {
-  return input
-      .toLowerCase()
-      .trim()
-      .replaceAll(RegExp(r'[^a-z0-9\s-]'), '')
-      .replaceAll(RegExp(r'[\s]+'), '-')
-      .replaceAll(RegExp(r'-+'), '-')
-      .replaceAll(RegExp(r'^-|-$'), '');
-}
 
 class ThousandMobilesApp extends StatelessWidget {
   const ThousandMobilesApp({super.key});
@@ -56,10 +48,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String _brand = '';
   String _model = '';
-  String? _deviceSlug;
   String? _deviceLabel;
   EolStatus _status = EolStatus.unchecked;
-  String? _eolDate;
+  String? _eolDateRaw;
+  bool _isEstimated = false;
 
   @override
   void initState() {
@@ -89,21 +81,19 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<List<Map<String, String>>?> _fetchDevices() async {
-    final manufacturer = _slugify(_brand);
-    final url = Uri.parse(
-      'https://1000mobiles.info/api/$manufacturer/devices',
-    );
-    final response = await http.get(url);
-    if (response.statusCode != 200) return null;
+  /// Helper method to make HTTP GET request with Basic Auth
+  Future<http.Response> _authenticatedGet(Uri url) async {
+    final headers = <String, String>{};
 
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    return (data['devices'] as List)
-        .map((d) => <String, String>{
-              'label': d['label'] as String,
-              'slug': d['slug'] as String,
-            })
-        .toList();
+    debugPrint('HTTP GET: $url');
+    debugPrint('Headers: $headers');
+
+    final response = await http.get(url, headers: headers);
+
+    debugPrint('Response status: ${response.statusCode}');
+    debugPrint('Response body: ${response.body}');
+
+    return response;
   }
 
   Future<void> _checkEol() async {
@@ -112,61 +102,18 @@ class _HomePageState extends State<HomePage> {
     setState(() => _status = EolStatus.loading);
 
     try {
-      // Resolve device slug if not yet matched
-      if (_deviceSlug == null) {
-        final devices = await _fetchDevices();
-        if (devices == null || devices.isEmpty) {
-          setState(() {
-            _status = EolStatus.unknown;
-            _eolDate = null;
-          });
-          return;
-        }
-
-        // Try exact slug match (brand + model)
-        final candidateSlug = _slugify('$_brand $_model');
-        final exactMatch =
-            devices.where((d) => d['slug'] == candidateSlug).toList();
-
-        if (exactMatch.isNotEmpty) {
-          _deviceSlug = exactMatch.first['slug'];
-          _deviceLabel = exactMatch.first['label'];
-        } else {
-          // Try partial match (model only)
-          final modelSlug = _slugify(_model);
-          final partialMatches =
-              devices.where((d) => d['slug']!.contains(modelSlug)).toList();
-
-          if (partialMatches.length == 1) {
-            _deviceSlug = partialMatches.first['slug'];
-            _deviceLabel = partialMatches.first['label'];
-          } else {
-            // No unique match: show picker
-            if (!mounted) return;
-            final picked = await _showDevicePicker(devices);
-            if (picked == null) {
-              setState(() => _status = EolStatus.unchecked);
-              return;
-            }
-            _deviceSlug = picked['slug'];
-            _deviceLabel = picked['label'];
-          }
-        }
-
-        setState(() {}); // Update display with matched label
-      }
-
-      final manufacturer = _slugify(_brand);
+      // Use the new /api/model/eol endpoint with model parameter
       final url = Uri.parse(
-        'https://1000mobiles.info/api/$manufacturer/$_deviceSlug/eol',
+        '${AppConfig.apiBaseUrl}/api/model/eol?model=${Uri.encodeQueryComponent(_model)}',
       );
 
-      final response = await http.get(url);
+      final response = await _authenticatedGet(url);
 
       if (response.statusCode != 200) {
         setState(() {
           _status = EolStatus.unknown;
-          _eolDate = null;
+          _eolDateRaw = null;
+          _isEstimated = false;
         });
         return;
       }
@@ -174,48 +121,56 @@ class _HomePageState extends State<HomePage> {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       final bool isEol = data['isEol'] ?? false;
       final String? eolFrom = data['eolFrom'];
+      final String? label = data['label'] as String?;
+      final bool isEstimated = data['isEstimated'] ?? false;
+
+      // Update device label from API response
+      if (label != null && label.isNotEmpty) {
+        _deviceLabel = label;
+      }
 
       if (isEol) {
         setState(() {
           _status = EolStatus.eol;
-          _eolDate = eolFrom;
+          _eolDateRaw = eolFrom;
+          _isEstimated = isEstimated;
         });
       } else if (eolFrom != null) {
         final eolDate = DateTime.tryParse(eolFrom);
         if (eolDate != null) {
-          final daysUntilEol = eolDate.difference(DateTime.now()).inDays;
+          // Compare dates only (without time)
+          final today = DateTime.now();
+          final todayDate = DateTime(today.year, today.month, today.day);
+          final eolDateOnly = DateTime(eolDate.year, eolDate.month, eolDate.day);
+          final daysUntilEol = eolDateOnly.difference(todayDate).inDays;
           setState(() {
             _status =
                 daysUntilEol < 180 ? EolStatus.eolSoon : EolStatus.updated;
-            _eolDate = eolFrom;
+            _eolDateRaw = eolFrom;
+            _isEstimated = isEstimated;
           });
         } else {
           setState(() {
             _status = EolStatus.updated;
-            _eolDate = eolFrom;
+            _eolDateRaw = eolFrom;
+            _isEstimated = isEstimated;
           });
         }
       } else {
         setState(() {
           _status = EolStatus.updated;
-          _eolDate = null;
+          _eolDateRaw = null;
+          _isEstimated = isEstimated;
         });
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Error checking EOL: $e');
       setState(() {
         _status = EolStatus.unknown;
-        _eolDate = null;
+        _eolDateRaw = null;
+        _isEstimated = false;
       });
     }
-  }
-
-  Future<Map<String, String>?> _showDevicePicker(
-    List<Map<String, String>> devices,
-  ) {
-    return showDialog<Map<String, String>>(
-      context: context,
-      builder: (context) => _DevicePickerDialog(devices: devices),
-    );
   }
 
   Color _buttonColor() {
@@ -235,13 +190,22 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _openBrowser() async {
-    final url = Uri.parse('https://1000mobiles.info');
+    final url = Uri.parse(AppConfig.apiBaseUrl);
     await launchUrl(url, mode: LaunchMode.externalApplication);
+  }
+
+  /// Format a date string using locale-aware formatting
+  String? _formatDateLocale(String? dateString, Locale locale) {
+    if (dateString == null) return null;
+    final dateTime = DateTime.tryParse(dateString);
+    if (dateTime == null) return dateString;
+    return DateFormat.yMd(locale.toString()).format(dateTime);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context);
 
     String statusText;
     Color? statusColor;
@@ -299,84 +263,34 @@ class _HomePageState extends State<HomePage> {
               statusText,
               style: TextStyle(color: statusColor),
             ),
-            if (_eolDate != null) ...[
+            if (_eolDateRaw != null) ...[
               const SizedBox(height: 4),
-              Text(l10n.eolDate(_eolDate!)),
+              Text(l10n.eolDate(_formatDateLocale(_eolDateRaw, locale)!)),
+            ],
+            if (_isEstimated) ...[
+              const SizedBox(height: 4),
+              Text(
+                '(${l10n.estimated})',
+                style: const TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
+                ),
+              ),
             ],
             const SizedBox(height: 32),
-            FilledButton.icon(
-              onPressed: _openBrowser,
-              icon: const Icon(Icons.open_in_browser),
-              label: Text(l10n.exploreMobile),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DevicePickerDialog extends StatefulWidget {
-  final List<Map<String, String>> devices;
-
-  const _DevicePickerDialog({required this.devices});
-
-  @override
-  State<_DevicePickerDialog> createState() => _DevicePickerDialogState();
-}
-
-class _DevicePickerDialogState extends State<_DevicePickerDialog> {
-  String _search = '';
-
-  List<Map<String, String>> get _filtered {
-    if (_search.isEmpty) return widget.devices;
-    final query = _search.toLowerCase();
-    return widget.devices
-        .where((d) => d['label']!.toLowerCase().contains(query))
-        .toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return AlertDialog(
-      title: Text(l10n.selectDevice),
-      content: SizedBox(
-        width: double.maxFinite,
-        height: 400,
-        child: Column(
-          children: [
-            TextField(
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: l10n.searchDevices,
-                prefixIcon: const Icon(Icons.search),
-              ),
-              onChanged: (v) => setState(() => _search = v),
+            Text(
+              l10n.exploreMobile,
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _filtered.length,
-                itemBuilder: (context, i) {
-                  final device = _filtered[i];
-                  return ListTile(
-                    title: Text(device['label']!),
-                    onTap: () => Navigator.of(context).pop(device),
-                  );
-                },
-              ),
+            FilledButton.icon(
+              onPressed: _openBrowser,
+              icon: const Icon(Icons.open_in_new),
+              label: const Text('1000mobiles.info'),
             ),
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
-        ),
-      ],
     );
   }
 }
