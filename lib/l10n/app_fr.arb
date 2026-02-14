@@ -1,6 +1,6 @@
 {
   "@@locale": "fr",
-  "appTitle": "Update Checker",
+  "appTitle": "End of Updates Checker",
   "tapToCheck": "Appuyez pour vérifier le statut des mises à jour",
   "checkingStatus": "Vérification...",
   "statusUpdated": "Reçoit encore des mises à jour",

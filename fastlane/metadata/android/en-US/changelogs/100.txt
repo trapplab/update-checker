@@ -1,1 +1,1 @@
-Initial release of Update Checker.
+Initial release of End of Updates Checker.

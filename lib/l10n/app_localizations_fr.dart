@@ -9,7 +9,7 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get appTitle => 'Update Checker';
+  String get appTitle => 'End of Updates Checker';
 
   @override
   String get tapToCheck => 'Appuyez pour vérifier le statut des mises à jour';

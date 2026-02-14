@@ -23,7 +23,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Update Checker'), findsOneWidget);
+    expect(find.text('End of Updates Checker'), findsOneWidget);
     expect(find.text('Tap to check update status'), findsOneWidget);
     expect(find.text('Explore mobile'), findsOneWidget);
   });
