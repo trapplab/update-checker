@@ -14,4 +14,4 @@
 
 ## [0.1.0]
 ### Added
-- Initial release with i18n Hello World
+- Initial release with mvp functionality

@@ -1,0 +1,2 @@
+## Aggiunto
+- Rilascio iniziale con funzionalità MVP

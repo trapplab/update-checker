@@ -1,0 +1,2 @@
+## Añadido
+- Lanzamiento inicial con funcionalidad MVP

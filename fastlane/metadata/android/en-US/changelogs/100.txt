@@ -1,1 +1,2 @@
-Initial release of End of Updates Checker.
+## Added
+- Initial release with mvp functionality

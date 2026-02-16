@@ -34,7 +34,7 @@ jobs:
         run: ./scripts/prepare_flavor.sh github
 
       - name: Build GitHub APK
-        run: flutter build apk --flavor github --target-platform=android-arm64 --release
+        run: flutter/bin/flutter build apk --flavor github --target-platform=android-arm64 --release
 
       - name: Rename APK
         run: |
@@ -65,4 +65,3 @@ jobs:
           body_path: release_notes.md
           files: |
             apks/sample-app-arm64-v8a-${{ github.ref_name }}.apk
-
