@@ -13,11 +13,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          submodules: recursive
 
       - name: Decode keystore
         run: |
@@ -34,7 +31,7 @@ jobs:
         run: ./scripts/prepare_flavor.sh github
 
       - name: Build GitHub APK
-        run: flutter/bin/flutter build apk --flavor github --target-platform=android-arm64 --release
+        run: ./flutter/bin/flutter build apk --flavor github --target-platform=android-arm64 --release
 
       - name: Rename APK
         run: |
