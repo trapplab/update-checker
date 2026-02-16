@@ -84,12 +84,16 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  /// Helper method to make HTTP GET request with Basic Auth
+  /// Helper method to make HTTP GET request with Basic Auth if credentials are configured
   Future<http.Response> _authenticatedGet(Uri url) async {
     final headers = <String, String>{};
 
+    if (AppConfig.user.isNotEmpty && AppConfig.password.isNotEmpty) {
+      final credentials = base64Encode(utf8.encode('${AppConfig.user}:${AppConfig.password}'));
+      headers['Authorization'] = 'Basic $credentials';
+    }
+
     debugPrint('HTTP GET: $url');
-    debugPrint('Headers: $headers');
 
     final response = await http.get(url, headers: headers);
 
@@ -270,7 +274,12 @@ class _HomePageState extends State<HomePage> {
     setState(() => _checkingImage = true);
 
     try {
-      final response = await http.head(Uri.parse(imageUrl));
+      final headers = <String, String>{};
+      if (AppConfig.user.isNotEmpty && AppConfig.password.isNotEmpty) {
+        final credentials = base64Encode(utf8.encode('${AppConfig.user}:${AppConfig.password}'));
+        headers['Authorization'] = 'Basic $credentials';
+      }
+      final response = await http.head(Uri.parse(imageUrl), headers: headers);
       debugPrint('Timeline image check status: ${response.statusCode}');
       if (!mounted) return;
       setState(() {

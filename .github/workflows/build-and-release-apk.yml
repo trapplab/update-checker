@@ -39,7 +39,7 @@ jobs:
       - name: Rename APK
         run: |
           mkdir -p apks
-          cp build/app/outputs/flutter-apk/app-github-release.apk apks/sample-app-arm64-v8a-${{ github.ref_name }}.apk
+          cp build/app/outputs/flutter-apk/app-github-release.apk apks/update-checker-arm64-v8a-${{ github.ref_name }}.apk
 
       - name: Get Version and Build Number
         id: version
@@ -66,41 +66,3 @@ jobs:
           files: |
             apks/sample-app-arm64-v8a-${{ github.ref_name }}.apk
 
-  deploy_playstore:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: Decode Playstore Secrets
-        env:
-          PLAYSTORE_JSON_BASE64: ${{ secrets.PLAYSTORE_JSON_BASE64 }}
-          KEYSTORE_BASE64: ${{ secrets.ANDROID_PLAYSTORE_KEYSTORE_BASE64 }}
-        run: |
-          mkdir -p android/fastlane
-          echo "$PLAYSTORE_JSON_BASE64" | base64 -d > android/fastlane/supply.json
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
-
-      - name: Create key.properties
-        run: |
-          echo "storeFile=upload-keystore.jks" >> android/key.properties
-          echo "storePassword=${{ secrets.ANDROID_PLAYSTORE_KEYSTORE_PASSWORD }}" >> android/key.properties
-          echo "keyAlias=${{ secrets.ANDROID_PLAYSTORE_KEY_ALIAS }}" >> android/key.properties
-          echo "keyPassword=${{ secrets.ANDROID_PLAYSTORE_KEY_PASSWORD }}" >> android/key.properties
-
-      - name: Prepare Play Flavor
-        run: ./scripts/prepare_flavor.sh play
-
-      - name: Build Play AAB
-        run: flutter build appbundle --flavor play --release
-
-      - name: Deploy to Open Testing
-        working-directory: android
-        run: fastlane open_test

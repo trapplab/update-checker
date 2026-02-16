@@ -7,4 +7,8 @@ class AppConfig {
 
   // API Configuration
   static const String apiBaseUrl = 'https://1000mobiles.info';
+
+  // Optional Basic Auth credentials (leave empty to disable)
+  static const String user = '';
+  static const String password = '';
 }
