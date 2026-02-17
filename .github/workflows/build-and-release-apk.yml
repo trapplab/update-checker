@@ -14,8 +14,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: recursive
           fetch-depth: 0
+          submodules: true
+
+      - name: Checkout Flutter
+        run: git submodule update --init --recursive
+
+      - name: Configure Flutter Environment
+        run: |
+          export PUB_CACHE=$(pwd)/.pub-cache
+          ./flutter/bin/flutter config --no-analytics
+
+      - name: Flutter Doctor
+        id: flutter_doctor
+        run: |
+          ./flutter/bin/flutter doctor -v
 
       - name: Decode keystore
         run: |
@@ -32,34 +45,63 @@ jobs:
         run: ./scripts/prepare_flavor.sh github
 
       - name: Build GitHub APK
-        run: ./flutter/bin/flutter build apk --flavor github --target-platform=android-arm64 --release
-
-      - name: Rename APK
         run: |
-          mkdir -p apks
-          cp build/app/outputs/flutter-apk/app-github-release.apk apks/update-checker-arm64-v8a-${{ github.ref_name }}.apk
+          export PUB_CACHE=$(pwd)/.pub-cache
+          ./flutter/bin/flutter build apk --flavor github --target-platform=android-arm64 --release
+
+      - name: Save GitHub APK
+        run: |
+          mkdir -p ${{ github.workspace }}/apks
+          cp build/app/outputs/flutter-apk/app-github-release.apk ${{ github.workspace }}/apks/github.apk
+
+      - name: Rename APKs with tag
+        run: |
+          mv ${{ github.workspace }}/apks/github.apk ${{ github.workspace }}/apks/update-checker-arm64-v8a-${{ github.ref_name }}.apk
 
       - name: Get Version and Build Number
         id: version
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           VERSION_LINE=$(grep '^version: ' pubspec.yaml)
           VERSION=$(echo $VERSION_LINE | sed 's/version: //')
           BUILD_NUMBER=$(echo $VERSION | cut -d '+' -f 2)
           echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
 
+      - name: Get Previous Tag
+        id: prev_tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 ${{ github.ref_name }}^ 2>/dev/null || echo "")
+          echo "tag=$PREV_TAG" >> $GITHUB_OUTPUT
+
       - name: Prepare Release Notes
         id: release_notes
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           CHANGELOG_FILE="fastlane/metadata/android/en-US/changelogs/${{ steps.version.outputs.build_number }}.txt"
+          
           if [ -f "$CHANGELOG_FILE" ]; then
             cat "$CHANGELOG_FILE" > release_notes.md
           else
-            echo "Release ${{ github.ref_name }}" > release_notes.md
+            echo "No changelog found for build ${{ steps.version.outputs.build_number }}" > release_notes.md
+          fi
+          
+          echo "" >> release_notes.md
+          echo "---" >> release_notes.md
+          echo "## Full Changes" >> release_notes.md
+          
+          if [ -n "${{ steps.prev_tag.outputs.tag }}" ]; then
+            echo "https://github.com/${{ github.repository }}/compare/${{ steps.prev_tag.outputs.tag }}..${{ github.ref_name }}" >> release_notes.md
+          else
+            echo "First release" >> release_notes.md
           fi
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           body_path: release_notes.md
           files: |
-            apks/sample-app-arm64-v8a-${{ github.ref_name }}.apk
+            ${{ github.workspace }}/apks/update-checker-arm64-v8a-${{ github.ref_name }}.apk
+
+
