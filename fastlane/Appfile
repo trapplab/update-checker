@@ -1,2 +1,2 @@
 json_key_file("fastlane/supply.json")
-package_name("com.trapplab.1000mobiles")
+package_name("com.trapplab.update_checker")
