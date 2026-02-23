@@ -156,8 +156,11 @@ class _HomePageState extends State<HomePage> {
           final eolDateOnly = DateTime(eolDate.year, eolDate.month, eolDate.day);
           final daysUntilEol = eolDateOnly.difference(todayDate).inDays;
           setState(() {
-            _status =
-                daysUntilEol < 180 ? EolStatus.eolSoon : EolStatus.updated;
+            _status = daysUntilEol <= 0
+                ? EolStatus.eol
+                : daysUntilEol < 180
+                    ? EolStatus.eolSoon
+                    : EolStatus.updated;
             _eolDateRaw = eolFrom;
             _isEstimated = isEstimated;
           });
