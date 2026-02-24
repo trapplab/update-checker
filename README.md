@@ -1,6 +1,23 @@
-# Sample App
+# <img src="assets/icon/logo.webp" alt="Mobile swirl icon" width="17%"/> NFC Radio
 
-Minimal Flutter starter template with i18n (5 languages), three build flavors (GitHub, F-Droid, Google Play), and CI/CD scaffolding.
+## Available on
+[<img src="https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid"
+      alt="Get it on F-Droid"
+      height="50">](https://f-droid.org/packages/com.trapplab.update_checker/)
+[<img src="https://img.shields.io/badge/Google_Play-01875f?style=for-the-badge&logo=google-play"
+      alt="Get it on Google Play"
+      hspace="16"
+      height="50">](https://play.google.com/store/apps/details?id=com.trapplab.update_checker)
+[<img src="https://img.shields.io/badge/GitHub%20Releases-100000?style=for-the-badge&logo=github"
+      alt="Get it on GitHub"
+      height="50">](https://github.com/trapplab/update-checker/releases)
+
+### Status
+![GitHub Release](https://img.shields.io/github/v/release/trapplab/update-checker)
+
+## Description
+
+This simple App checks the date when your mobiles update ends (end of life). You can save it as a calendar entry and compare devices on [1000mobiles.info](https://www.1000mobiles.info/)
 
 ## Quick Start
 
