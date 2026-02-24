@@ -50,6 +50,11 @@ jobs:
           export PUB_CACHE=$(pwd)/.pub-cache
           ./flutter/bin/flutter build apk --flavor fdroid --target-platform=android-arm64 --release
 
+      - name: Save F-Droid APK
+        run: |
+          mkdir -p ${{ github.workspace }}/apks
+          cp build/app/outputs/flutter-apk/app-fdroid-release.apk ${{ github.workspace }}/apks/update-checker-fdroid-arm64-v8a-${{ github.ref_name }}.apk
+
       - name: Prepare GitHub Flavor
         run: ./scripts/prepare_flavor.sh github
 
@@ -58,10 +63,8 @@ jobs:
           export PUB_CACHE=$(pwd)/.pub-cache
           ./flutter/bin/flutter build apk --flavor github --target-platform=android-arm64 --release
 
-      - name: Save APKs
+      - name: Save GitHub APK
         run: |
-          mkdir -p ${{ github.workspace }}/apks
-          cp build/app/outputs/flutter-apk/app-fdroid-release.apk ${{ github.workspace }}/apks/update-checker-fdroid-arm64-v8a-${{ github.ref_name }}.apk
           cp build/app/outputs/flutter-apk/app-github-release.apk ${{ github.workspace }}/apks/update-checker-arm64-v8a-${{ github.ref_name }}.apk
 
       - name: Get Version and Build Number
