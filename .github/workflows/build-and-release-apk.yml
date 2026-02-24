@@ -48,7 +48,7 @@ jobs:
       - name: Build F-Droid APK
         run: |
           export PUB_CACHE=$(pwd)/.pub-cache
-          ./flutter/bin/flutter build apk --flavor fdroid --target-platform=android-arm64 --release --extra-gen-snapshot-options=--deterministic
+          ./flutter/bin/flutter build apk --flavor fdroid --target-platform=android-arm64 --release --extra-gen-snapshot-options=--deterministic --split-debug-info=/tmp/debug-info
 
       - name: Save F-Droid APK
         run: |
