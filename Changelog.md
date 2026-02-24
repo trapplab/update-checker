@@ -12,6 +12,10 @@
 
 # Changelog
 
+## [0.1.1]
+### Changed
+- Prepared for easier release process
+
 ## [0.1.0]
 ### Added
 - Initial release with mvp functionality
