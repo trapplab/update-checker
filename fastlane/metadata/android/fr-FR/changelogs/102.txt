@@ -1,0 +1,3 @@
+## Modifié
+- Utilisez l'anglais comme langue par défaut
+- préparer la version fdroid

@@ -1,0 +1,3 @@
+## Modificato
+- Usa l'inglese come lingua predefinita
+- preparare il rilascio fdroid

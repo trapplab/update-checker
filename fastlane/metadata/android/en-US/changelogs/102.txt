@@ -1,0 +1,3 @@
+## Changed
+- Use english as default language
+- prepare fdroid release

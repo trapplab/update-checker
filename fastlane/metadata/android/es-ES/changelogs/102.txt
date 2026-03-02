@@ -1,0 +1,3 @@
+## Cambiado
+- Usar inglés como idioma predeterminado
+- preparar la versión de fdroid

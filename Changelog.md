@@ -12,6 +12,11 @@
 
 # Changelog
 
+## [0.1.2]
+### Changed
+- Use english as default language
+- prepare fdroid release
+
 ## [0.1.1]
 ### Changed
 - Prepared for easier release process

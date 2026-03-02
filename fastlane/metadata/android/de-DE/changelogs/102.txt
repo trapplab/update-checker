@@ -1,0 +1,3 @@
+## Geändert
+- Verwenden Sie Englisch als Standardsprache
+- FDroid-Version vorbereiten
