@@ -1,0 +1,2 @@
+## Cambiado
+- Preparado para un proceso de lanzamiento más sencillo

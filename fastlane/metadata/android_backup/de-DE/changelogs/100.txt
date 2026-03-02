@@ -1,0 +1,2 @@
+## Hinzugefügt
+- Erste Version mit MVP-Funktionalität veröffentlicht

@@ -1,0 +1,2 @@
+## Geändert
+- Für einen einfacheren Release-Prozess vorbereitet
