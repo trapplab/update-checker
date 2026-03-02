@@ -29,6 +29,16 @@ class ThousandMobilesApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
+      localeResolutionCallback: (locale, supportedLocales) {
+        if (locale != null) {
+          for (final supported in supportedLocales) {
+            if (supported.languageCode == locale.languageCode) {
+              return supported;
+            }
+          }
+        }
+        return const Locale('en');
+      },
       theme: ThemeData(
         colorSchemeSeed: Colors.blue,
         useMaterial3: true,
