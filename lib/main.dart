@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
 import 'l10n/app_localizations.dart';
@@ -494,6 +495,30 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: const FaIcon(FontAwesomeIcons.github),
+              tooltip: 'GitHub',
+              onPressed: () => launchUrl(
+                Uri.parse('https://github.com/trapplab/update-checker'),
+                mode: LaunchMode.externalApplication,
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const FaIcon(FontAwesomeIcons.mugHot),
+              tooltip: 'Buy me a coffee',
+              onPressed: () => launchUrl(
+                Uri.parse('https://buymeacoffee.com/trapplab'),
+                mode: LaunchMode.externalApplication,
+              ),
+            ),
+          ],
         ),
       ),
     );

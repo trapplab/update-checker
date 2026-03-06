@@ -12,6 +12,10 @@
 
 # Changelog
 
+xxx
+### Added
+- Iconbar in the footer
+
 ## [0.1.2]
 ### Changed
 - Use english as default language
