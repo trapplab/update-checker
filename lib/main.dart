@@ -154,6 +154,7 @@ class _HomePageState extends State<HomePage> {
 
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       final bool isEol = data['isEol'] ?? false;
+      final bool useEolBool = data['useEolBool'] ?? false;
       final String? eolFrom = data['eolFrom'];
       final String? label = data['label'] as String?;
       final String? manufacturer = data['manufacturer'] as String?;
@@ -165,6 +166,17 @@ class _HomePageState extends State<HomePage> {
       }
       if (manufacturer != null && manufacturer.isNotEmpty) {
         _manufacturer = manufacturer;
+      }
+
+      // When useEolBool is true, EOL status is boolean-only — show green without a date
+      if (useEolBool && !isEol) {
+        setState(() {
+          _status = EolStatus.updated;
+          _eolDateRaw = null;
+          _isEstimated = false;
+        });
+        _checkTimelineImage();
+        return;
       }
 
       if (isEol) {

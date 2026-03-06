@@ -16,6 +16,9 @@ xxx
 ### Added
 - Iconbar in the footer
 
+### Fixed
+- Show devices with "useEolBool":true without a exact date
+
 ## [0.1.2]
 ### Changed
 - Use english as default language
