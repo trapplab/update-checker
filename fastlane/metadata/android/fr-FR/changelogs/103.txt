@@ -1,0 +1,5 @@
+## Ajouté
+- Barre d'icônes dans le pied de page
+- vérification automatique des mises à jour depuis la version GitHub
+## Corrigé
+- Afficher les appareils avec useEolBool à true sans date précise

@@ -1,0 +1,5 @@
+## Hinzugefügt
+- Symbolleiste in der Fußzeile
+- automatische Überprüfung von Updates der GitHub-Version
+## Behoben
+- Geräte mit aktivem useEolBool anzeigen, ohne ein genaues Datum anzugeben

@@ -1,0 +1,5 @@
+## Añadido
+- Barra de iconos en el pie de página
+- comprobación automática de actualizaciones desde la versión de GitHub
+## Corregido
+- Mostrar dispositivos con useEolBool verdadero sin una fecha exacta

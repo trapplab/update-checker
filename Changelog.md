@@ -12,12 +12,12 @@
 
 # Changelog
 
-xxx
+## [0.1.3]
 ### Added
 - Iconbar in the footer
-
+- auto check updates from github version
 ### Fixed
-- Show devices with "useEolBool":true without a exact date
+- Show devices with useEolBool are true without a exact date
 
 ## [0.1.2]
 ### Changed
