@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -56,6 +57,17 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+const _debugTestModels = [
+  'SM-S928B',    // Samsung Galaxy S24 Ultra
+  'SM-A546B',    // Samsung Galaxy A54
+  'Pixel 8 Pro',
+  'Pixel 6a',
+  'moto g84 5G',
+  'CPH2587',     // OnePlus 12
+  '23049PCD8G',  // Xiaomi 13T
+  'V2309A',      // vivo X90 Pro
+];
+
 class _HomePageState extends State<HomePage> {
   String _brand = '';
   String _model = '';
@@ -66,6 +78,7 @@ class _HomePageState extends State<HomePage> {
   bool _isEstimated = false;
   bool _timelineImageExists = false;
   bool _checkingImage = false;
+  String? _debugModel;
 
   @override
   void initState() {
@@ -121,8 +134,11 @@ class _HomePageState extends State<HomePage> {
 
     try {
       // Use the new /api/model/eol endpoint with model parameter
+      final modelToCheck = kDebugMode && (_debugModel?.isNotEmpty ?? false)
+          ? _debugModel!
+          : _model;
       final url = Uri.parse(
-        '${AppConfig.apiBaseUrl}/api/model/eol?model=${Uri.encodeQueryComponent(_model)}',
+        '${AppConfig.apiBaseUrl}/api/model/eol?model=${Uri.encodeQueryComponent(modelToCheck)}',
       );
 
       final response = await _authenticatedGet(url);
@@ -347,6 +363,46 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                if (kDebugMode) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                    child: Autocomplete<String>(
+                      optionsBuilder: (textValue) {
+                        if (textValue.text.isEmpty) return _debugTestModels;
+                        return _debugTestModels.where(
+                          (m) => m.toLowerCase().contains(textValue.text.toLowerCase()),
+                        );
+                      },
+                      onSelected: (value) {
+                        setState(() {
+                          _debugModel = value;
+                          _deviceLabel = null;
+                          _status = EolStatus.unchecked;
+                        });
+                      },
+                      fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                        return TextField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          decoration: const InputDecoration(
+                            labelText: 'Debug: model override',
+                            hintText: 'e.g. Pixel 8 Pro',
+                            prefixIcon: Icon(Icons.bug_report),
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                          ),
+                          onChanged: (value) => setState(() {
+                            _debugModel = value.isEmpty ? null : value;
+                            _deviceLabel = null;
+                            _status = EolStatus.unchecked;
+                          }),
+                          onSubmitted: (_) => onSubmitted(),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
                 SizedBox(
                   width: 200,
                   height: 200,
@@ -392,7 +448,7 @@ class _HomePageState extends State<HomePage> {
                             ? const CircularProgressIndicator(color: Colors.white)
                             : Text(
                                 _brand.isNotEmpty
-                                    ? _deviceLabel ?? l10n.deviceName(_brand, _model)
+                                    ? (kDebugMode && _debugModel != null ? _debugModel! : null) ?? _deviceLabel ?? l10n.deviceName(_brand, _model)
                                     : '...',
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
