@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'l10n/app_localizations.dart';
 import 'config/config.dart';
@@ -79,11 +80,43 @@ class _HomePageState extends State<HomePage> {
   bool _timelineImageExists = false;
   bool _checkingImage = false;
   String? _debugModel;
+  String? _updateVersion;
 
   @override
   void initState() {
     super.initState();
     _loadDeviceInfo();
+    if (AppConfig.isGitHubRelease) _checkForAppUpdate();
+  }
+
+  Future<void> _checkForAppUpdate() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      final response = await http.get(
+        Uri.parse('https://api.github.com/repos/trapplab/update-checker/releases/latest'),
+        headers: {'Accept': 'application/vnd.github+json'},
+      );
+      if (response.statusCode != 200) return;
+      final tag = (jsonDecode(response.body) as Map<String, dynamic>)['tag_name'] as String?;
+      if (tag == null) return;
+      final latest = tag.replaceFirst(RegExp(r'^v'), '');
+      if (_isNewer(latest, info.version)) {
+        if (!mounted) return;
+        setState(() => _updateVersion = latest);
+      }
+    } catch (_) {}
+  }
+
+  bool _isNewer(String latest, String current) {
+    final l = latest.split('.').map(int.tryParse).toList();
+    final c = current.split('.').map(int.tryParse).toList();
+    for (var i = 0; i < 3; i++) {
+      final lv = (i < l.length ? l[i] : null) ?? 0;
+      final cv = (i < c.length ? c[i] : null) ?? 0;
+      if (lv > cv) return true;
+      if (lv < cv) return false;
+    }
+    return false;
   }
 
   Future<void> _loadDeviceInfo() async {
@@ -375,6 +408,27 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                if (_updateVersion != null) ...[
+                  MaterialBanner(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    content: Text('Version $_updateVersion available'),
+                    leading: const Icon(Icons.system_update),
+                    actions: [
+                      TextButton(
+                        onPressed: () => launchUrl(
+                          Uri.parse('https://github.com/trapplab/update-checker/releases/latest'),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                        child: const Text('Update'),
+                      ),
+                      TextButton(
+                        onPressed: () => setState(() => _updateVersion = null),
+                        child: const Text('Dismiss'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 if (kDebugMode) ...[
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 32.0),
