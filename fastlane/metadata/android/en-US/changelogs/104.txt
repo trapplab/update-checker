@@ -1,0 +1,3 @@
+## Changed
+- Link to language aware remote https://1000mobiles.info
+- improve readme

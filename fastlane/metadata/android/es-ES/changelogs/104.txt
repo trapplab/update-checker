@@ -1,0 +1,3 @@
+## Cambiado
+- Enlace al control remoto con reconocimiento de idioma https://1000mobiles.info
+- mejorar el archivo README

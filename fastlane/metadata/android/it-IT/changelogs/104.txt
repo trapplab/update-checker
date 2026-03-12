@@ -1,0 +1,3 @@
+## Modificato
+- Link al telecomando con riconoscimento della lingua https://1000mobiles.info
+- migliorare il file readme

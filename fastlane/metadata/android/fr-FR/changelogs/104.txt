@@ -1,0 +1,3 @@
+## Modifié
+- Lien vers la télécommande compatible multilingue https://1000mobiles.info
+- améliorer le fichier readme

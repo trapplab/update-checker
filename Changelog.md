@@ -12,6 +12,11 @@
 
 # Changelog
 
+## [0.1.4]
+### Changed
+- Link to language aware remote https://1000mobiles.info
+- improve readme
+
 ## [0.1.3]
 ### Added
 - Iconbar in the footer

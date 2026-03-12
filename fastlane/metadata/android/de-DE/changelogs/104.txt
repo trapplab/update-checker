@@ -1,0 +1,3 @@
+## Geändert
+- Link zur sprachsensitiven Fernbedienung https://1000mobiles.info
+- README verbessern
