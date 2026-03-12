@@ -278,8 +278,11 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> _openBrowser() async {
-    final url = Uri.parse(AppConfig.apiBaseUrl);
+  Future<void> _openBrowser(BuildContext context) async {
+    final languageCode = Localizations.localeOf(context).languageCode;
+    const supportedLanguages = {'de', 'it', 'fr', 'es'};
+    final path = supportedLanguages.contains(languageCode) ? '/$languageCode' : '';
+    final url = Uri.parse('${AppConfig.apiBaseUrl}$path');
     await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 
@@ -610,7 +613,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 8),
                 FilledButton.icon(
-                  onPressed: _openBrowser,
+                  onPressed: () => _openBrowser(context),
                   icon: const Icon(Icons.open_in_new),
                   label: const Text('1000mobiles.info'),
                 ),

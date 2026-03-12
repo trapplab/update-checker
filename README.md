@@ -19,6 +19,10 @@
 
 This simple App checks the date when your mobiles update ends (end of life). You can save it as a calendar entry and compare devices on [1000mobiles.info](https://www.1000mobiles.info/)
 
+## Screenshots
+
+<img src="assets/overview.jpg" alt="App Screenshot Overview" width="600"/>
+
 ## Quick Start
 
 ```bash
@@ -57,55 +61,6 @@ This ensures all developers and CI use the identical SDK version. The `prepare_f
 - uses: actions/checkout@v4
   with:
     submodules: true
-```
-
-## Customize This Template
-
-### 1. Rename the project
-
-Search and replace these placeholders across the project:
-
-| Placeholder | Replace with | Example |
-|---|---|---|
-| `sample_app` | your Dart package name (snake_case) | `my_cool_app` |
-| `Sample App` | your display name | `My Cool App` |
-| `com.example.sample_app` | your application ID | `com.mycompany.my_cool_app` |
-| `com/example/sample_app` | matching directory path | `com/mycompany/my_cool_app` |
-
-Files to update:
-- `pubspec.yaml`, `pubspec.fdroid.yaml`, `pubspec.play.yaml` — `name:` field
-- `android/app/build.gradle.kts` — `namespace` and `applicationId`
-- `android/app/src/main/AndroidManifest.xml` — `android:label`
-- `android/app/src/main/kotlin/com/example/sample_app/MainActivity.kt` — package declaration, and rename the directory path to match
-- `fastlane/Appfile` — `package_name`
-- `LICENSE` — `YOUR_NAME_HERE`
-
-### 2. Add platforms
-
-This template ships with Android only. Add more platforms:
-
-```bash
-# Add iOS and Web support
-flutter create --platforms ios,web .
-
-# Add Linux desktop support
-flutter create --platforms linux .
-```
-
-### 3. Install the pre-commit hook
-
-```bash
-ln -sf scripts/git-hooks/pre-commit .git/hooks/pre-commit
-```
-
-This enforces version consistency across `pubspec.yaml`, `pubspec.fdroid.yaml`, `pubspec.play.yaml`, and `Changelog.md`. It also auto-generates translated changelogs for fastlane.
-
-### 4. Set up changelog translation (optional)
-
-The `update_changelogs_with_translation.sh` script uses the OpenAI API to translate changelogs. Create a `.env` file:
-
-```
-OPENAI_API_TOKEN=sk-...
 ```
 
 ## Build Flavors
