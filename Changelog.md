@@ -12,6 +12,11 @@
 
 # Changelog
 
+## [1.0.0]
+### Changed
+- Update to latest 1000mobiles.com API
+- bump versions
+
 ## [0.1.4]
 ### Changed
 - Link to language aware remote https://1000mobiles.com

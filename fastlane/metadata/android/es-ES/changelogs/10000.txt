@@ -1,0 +1,3 @@
+## Cambiado
+- Actualización a la última API de 1000mobiles.com
+- versiones actualizadas
