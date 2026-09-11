@@ -6,3 +6,6 @@ linter:
 analyzer:
   exclude:
     - flutter/**
+    - build/**
+    - android/**
+    - linux/**

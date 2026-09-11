@@ -1,4 +1,4 @@
-# <img src="assets/icon/logo.webp" alt="Mobile swirl icon" width="17%"/> NFC Radio
+# <img src="assets/icon/logo.webp" alt="Mobile swirl icon" width="17%"/> 100mobiles app
 
 ## Available on
 [<img src="https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid"
@@ -17,7 +17,7 @@
 
 ## Description
 
-This simple App checks the date when your mobiles update ends (end of life). You can save it as a calendar entry and compare devices on [1000mobiles.info](https://www.1000mobiles.info/)
+This simple App checks the date when your mobiles update ends (end of life). You can save it as a calendar entry and compare devices on [1000mobiles.com](https://www.1000mobiles.com/)
 
 ## Screenshots
 
