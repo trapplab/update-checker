@@ -25,9 +25,9 @@ No user data is transmitted to the developer.
 
 ## 3. Third-Party Services
 
-Update Checker uses web services from 1000mobiles.info. When using these services, the privacy policy of 1000mobiles.info applies:
+Update Checker uses web services from 1000mobiles.com. When using these services, the privacy policy of 1000mobiles.com applies:
 
-* [1000mobiles.info Privacy Policy](https://www.1000mobiles.info/privacypolicy)
+* [1000mobiles.com Privacy Policy](https://www.1000mobiles.com/privacypolicy)
 
 Please refer to the linked privacy policy for information on how data is handled when using these web services.
 

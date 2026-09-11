@@ -14,7 +14,7 @@
 
 ## [0.1.4]
 ### Changed
-- Link to language aware remote https://1000mobiles.info
+- Link to language aware remote https://1000mobiles.com
 - improve readme
 
 ## [0.1.3]

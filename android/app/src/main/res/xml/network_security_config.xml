@@ -6,7 +6,7 @@
         </trust-anchors>
     </base-config>
     <domain-config cleartextTrafficPermitted="false">
-        <domain includeSubdomains="true">1000mobiles.info</domain>
+        <domain includeSubdomains="true">1000mobiles.com</domain>
         <trust-anchors>
             <certificates src="system" />
         </trust-anchors>

@@ -6,7 +6,7 @@ class AppConfig {
   static bool get isGooglePlayRelease => FlavorConfig.isPlay;
 
   // API Configuration
-  static const String apiBaseUrl = 'https://1000mobiles.info';
+  static const String apiBaseUrl = 'https://1000mobiles.com';
 
   // Optional Basic Auth credentials (leave empty to disable)
   static const String user = '';

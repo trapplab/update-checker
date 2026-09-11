@@ -615,7 +615,7 @@ class _HomePageState extends State<HomePage> {
                 FilledButton.icon(
                   onPressed: () => _openBrowser(context),
                   icon: const Icon(Icons.open_in_new),
-                  label: const Text('1000mobiles.info'),
+                  label: const Text('1000mobiles.com'),
                 ),
               ],
             ),
