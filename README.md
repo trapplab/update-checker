@@ -1,4 +1,4 @@
-# <img src="assets/icon/logo.webp" alt="Mobile swirl icon" width="17%"/> 100mobiles app
+# <img src="assets/icon/logo.webp" alt="Mobile swirl icon" width="17%"/> Update Checker App (based on [1000mobiles](https://1000mobiles.com) service)
 
 ## Available on
 [<img src="https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid"
