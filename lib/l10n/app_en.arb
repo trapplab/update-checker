@@ -1,7 +1,6 @@
 {
   "@@locale": "en",
   "appTitle": "End of Updates Checker",
-  "tapToCheck": "Tap to check update status",
   "checkingStatus": "Checking...",
   "statusUpdated": "Still receiving updates",
   "statusEolSoon": "End of updates in less than 6 months",
@@ -25,5 +24,8 @@
   },
   "estimated": "estimated",
   "addToCalendar": "Add to calendar",
-  "today": "Today"
+  "today": "Today",
+  "yourDevice": "Your device",
+  "checkNow": "Check update status",
+  "checkAgain": "Check again"
 }

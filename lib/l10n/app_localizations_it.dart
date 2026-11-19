@@ -12,9 +12,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get appTitle => 'End of Updates Checker';
 
   @override
-  String get tapToCheck => 'Tocca per verificare lo stato degli aggiornamenti';
-
-  @override
   String get checkingStatus => 'Verifica in corso...';
 
   @override
@@ -56,4 +53,13 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get today => 'Oggi';
+
+  @override
+  String get yourDevice => 'Il tuo dispositivo';
+
+  @override
+  String get checkNow => 'Verifica stato aggiornamenti';
+
+  @override
+  String get checkAgain => 'Verifica di nuovo';
 }

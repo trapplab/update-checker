@@ -110,12 +110,6 @@ abstract class AppLocalizations {
   /// **'End of Updates Checker'**
   String get appTitle;
 
-  /// No description provided for @tapToCheck.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap to check update status'**
-  String get tapToCheck;
-
   /// No description provided for @checkingStatus.
   ///
   /// In en, this message translates to:
@@ -193,6 +187,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Today'**
   String get today;
+
+  /// No description provided for @yourDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Your device'**
+  String get yourDevice;
+
+  /// No description provided for @checkNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Check update status'**
+  String get checkNow;
+
+  /// No description provided for @checkAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get checkAgain;
 }
 
 class _AppLocalizationsDelegate

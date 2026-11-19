@@ -1,7 +1,6 @@
 {
   "@@locale": "fr",
   "appTitle": "End of Updates Checker",
-  "tapToCheck": "Appuyez pour vérifier le statut des mises à jour",
   "checkingStatus": "Vérification...",
   "statusUpdated": "Reçoit encore des mises à jour",
   "statusEolSoon": "Fin des mises à jour dans moins de 6 mois",
@@ -25,5 +24,8 @@
   },
   "estimated": "estimé",
   "addToCalendar": "Ajouter au calendrier",
-  "today": "Aujourd'hui"
+  "today": "Aujourd'hui",
+  "yourDevice": "Votre appareil",
+  "checkNow": "Vérifier le statut des mises à jour",
+  "checkAgain": "Vérifier à nouveau"
 }
