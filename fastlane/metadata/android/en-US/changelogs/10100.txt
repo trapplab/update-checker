@@ -1,0 +1,4 @@
+## Added
+- Lifecycle bar showing device support status
+## Changed
+- Redesigned UI and UX with new app theme
