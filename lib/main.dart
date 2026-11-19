@@ -11,6 +11,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'l10n/app_localizations.dart';
 import 'config/config.dart';
+import 'theme/app_theme.dart';
+import 'widgets/lifecycle_bar.dart';
 
 void main() {
   runApp(const ThousandMobilesApp());
@@ -42,10 +44,8 @@ class ThousandMobilesApp extends StatelessWidget {
         }
         return const Locale('en');
       },
-      theme: ThemeData(
-        colorSchemeSeed: Colors.blue,
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
       home: const HomePage(),
     );
   }
@@ -73,12 +73,11 @@ class _HomePageState extends State<HomePage> {
   String _brand = '';
   String _model = '';
   String? _deviceLabel;
-  String? _manufacturer;
   EolStatus _status = EolStatus.unchecked;
   String? _eolDateRaw;
+  String? _releaseDateRaw;
+  bool _useEolBool = false;
   bool _isEstimated = false;
-  bool _timelineImageExists = false;
-  bool _checkingImage = false;
   String? _debugModel;
   String? _updateVersion;
 
@@ -190,15 +189,13 @@ class _HomePageState extends State<HomePage> {
       final bool useEolBool = data['useEolBool'] ?? false;
       final String? eolFrom = data['eolFrom'];
       final String? label = data['label'] as String?;
-      final String? manufacturer = data['manufacturer'] as String?;
       final bool isEstimated = data['isEstimated'] ?? false;
+      _releaseDateRaw = data['releaseDate'] as String?;
+      _useEolBool = useEolBool;
 
-      // Update device label and manufacturer from API response
+      // Update device label from API response
       if (label != null && label.isNotEmpty) {
         _deviceLabel = label;
-      }
-      if (manufacturer != null && manufacturer.isNotEmpty) {
-        _manufacturer = manufacturer;
       }
 
       // When useEolBool is true, EOL status is boolean-only — show green without a date
@@ -208,7 +205,6 @@ class _HomePageState extends State<HomePage> {
           _eolDateRaw = null;
           _isEstimated = false;
         });
-        _checkTimelineImage();
         return;
       }
 
@@ -218,7 +214,6 @@ class _HomePageState extends State<HomePage> {
           _eolDateRaw = eolFrom;
           _isEstimated = isEstimated;
         });
-        _checkTimelineImage();
       } else if (eolFrom != null) {
         final eolDate = DateTime.tryParse(eolFrom);
         if (eolDate != null) {
@@ -243,39 +238,61 @@ class _HomePageState extends State<HomePage> {
             _isEstimated = isEstimated;
           });
         }
-        _checkTimelineImage();
       } else {
         setState(() {
           _status = EolStatus.updated;
           _eolDateRaw = null;
           _isEstimated = isEstimated;
         });
-        _checkTimelineImage();
       }
     } catch (e) {
       debugPrint('Error checking EOL: $e');
       setState(() {
         _status = EolStatus.unknown;
         _eolDateRaw = null;
+        _releaseDateRaw = null;
         _isEstimated = false;
       });
     }
   }
 
-  Color _buttonColor() {
+  StatusLevel _statusLevel() {
     switch (_status) {
       case EolStatus.unchecked:
       case EolStatus.loading:
-        return Colors.grey;
-      case EolStatus.updated:
-        return Colors.green;
-      case EolStatus.eolSoon:
-        return Colors.amber;
-      case EolStatus.eol:
-        return Colors.red;
       case EolStatus.unknown:
-        return Colors.blue;
+        return StatusLevel.unknown;
+      case EolStatus.eol:
+        return StatusLevel.ended;
+      case EolStatus.eolSoon:
+        return StatusLevel.soon;
+      case EolStatus.updated:
+        final eolDate = DateTime.tryParse(_eolDateRaw ?? '');
+        if (eolDate == null) return StatusLevel.good;
+        final now = DateTime.now();
+        final months = (eolDate.year - now.year) * 12 + (eolDate.month - now.month);
+        return months >= 24 ? StatusLevel.good : StatusLevel.ok;
     }
+  }
+
+  Color _buttonColor(BuildContext context) {
+    switch (_status) {
+      case EolStatus.unchecked:
+      case EolStatus.loading:
+        return Theme.of(context).colorScheme.primary;
+      default:
+        return StatusColors.of(context).forLevel(_statusLevel());
+    }
+  }
+
+  int? _lifecyclePercent() {
+    if (_useEolBool) return null;
+    final start = DateTime.tryParse(_releaseDateRaw ?? '');
+    final end = DateTime.tryParse(_eolDateRaw ?? '');
+    if (start == null || end == null || !end.isAfter(start)) return null;
+    final ratio = DateTime.now().difference(start).inMilliseconds /
+        end.difference(start).inMilliseconds;
+    return (ratio.clamp(0.0, 1.0) * 100).round();
   }
 
   Future<void> _openBrowser(BuildContext context) async {
@@ -318,60 +335,213 @@ class _HomePageState extends State<HomePage> {
     if (dateString == null) return null;
     final dateTime = DateTime.tryParse(dateString);
     if (dateTime == null) return dateString;
-    return DateFormat.yMd(locale.toString()).format(dateTime);
+    return DateFormat.yMMMMd(locale.toString()).format(dateTime);
   }
 
-  /// Convert label to URL-friendly slug
-  String _labelToSlug(String label) {
-    return label
-        .toLowerCase()
-        .replaceAll(' ', '-')
-        .replaceAll(RegExp(r'[^a-z0-9-]'), '');
+  String? _formatShortDate(String? dateString, Locale locale) {
+    final dateTime = DateTime.tryParse(dateString ?? '');
+    if (dateTime == null) return null;
+    return DateFormat.yMMMd(locale.toString()).format(dateTime);
   }
 
-  /// Build the timeline image URL
-  String? _buildTimelineImageUrl() {
-    if (_manufacturer == null || _deviceLabel == null) return null;
-    final manufacturerSlug = _manufacturer!.toLowerCase();
-    final labelSlug = _labelToSlug(_deviceLabel!);
-    return '${AppConfig.apiBaseUrl}/timeline/$manufacturerSlug/$labelSlug.png';
+  String _displayName(AppLocalizations l10n) {
+    if (_brand.isEmpty) return '...';
+    if (kDebugMode && _debugModel != null) return _debugModel!;
+    return _deviceLabel ?? l10n.deviceName(_brand, _model);
   }
 
-  /// Check if the timeline image exists
-  Future<void> _checkTimelineImage() async {
-    final imageUrl = _buildTimelineImageUrl();
-    if (imageUrl == null) {
-      setState(() {
-        _timelineImageExists = false;
-        _checkingImage = false;
-      });
-      return;
+  Widget _buildResultCard(BuildContext context, AppLocalizations l10n, Locale locale) {
+    final colors = StatusColors.of(context);
+    final theme = Theme.of(context);
+
+    Widget content;
+    switch (_status) {
+      case EolStatus.unchecked:
+        content = Container(
+          key: const ValueKey('empty'),
+          constraints: const BoxConstraints(minHeight: 112),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: colors.cardBorder, width: 1.5),
+          ),
+          child: Text(
+            l10n.tapToCheck,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(color: colors.muted),
+          ),
+        );
+      case EolStatus.loading:
+        content = Container(
+          key: const ValueKey('loading'),
+          constraints: const BoxConstraints(minHeight: 112),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: colors.accentedBg.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2, color: colors.muted),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                l10n.checkingStatus,
+                style: theme.textTheme.bodyMedium?.copyWith(color: colors.muted),
+              ),
+            ],
+          ),
+        );
+      default:
+        content = _buildStatusPanel(context, l10n, locale);
     }
 
-    debugPrint('Timeline image URL: $imageUrl');
-    setState(() => _checkingImage = true);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: colors.cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        child: content,
+      ),
+    );
+  }
 
-    try {
-      final headers = <String, String>{};
-      if (AppConfig.user.isNotEmpty && AppConfig.password.isNotEmpty) {
-        final credentials = base64Encode(utf8.encode('${AppConfig.user}:${AppConfig.password}'));
-        headers['Authorization'] = 'Basic $credentials';
-      }
-      final response = await http.head(Uri.parse(imageUrl), headers: headers);
-      debugPrint('Timeline image check status: ${response.statusCode}');
-      if (!mounted) return;
-      setState(() {
-        _timelineImageExists = response.statusCode == 200;
-        _checkingImage = false;
-      });
-    } catch (e) {
-      debugPrint('Error checking timeline image: $e');
-      if (!mounted) return;
-      setState(() {
-        _timelineImageExists = false;
-        _checkingImage = false;
-      });
+  Widget _buildStatusPanel(BuildContext context, AppLocalizations l10n, Locale locale) {
+    final colors = StatusColors.of(context);
+    final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
+
+    final Color tone;
+    final IconData icon;
+    final String statusText;
+    switch (_status) {
+      case EolStatus.eol:
+        tone = colors.error;
+        icon = Icons.cancel_outlined;
+        statusText = l10n.statusEol;
+      case EolStatus.eolSoon:
+        tone = colors.warning;
+        icon = Icons.error_outline;
+        statusText = l10n.statusEolSoon;
+      case EolStatus.unknown:
+        tone = colors.muted;
+        icon = Icons.help_outline;
+        statusText = l10n.statusUnknown;
+      default:
+        tone = colors.success;
+        icon = Icons.check_circle_outline;
+        statusText = l10n.statusUpdated;
     }
+
+    final percent = _lifecyclePercent();
+    final eolDate = _formatDateLocale(_eolDateRaw, locale);
+
+    return Container(
+      key: ValueKey(_status),
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: tone.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: tone, size: 36),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _displayName(l10n),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      statusText,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: tone,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (eolDate != null) ...[
+            const SizedBox(height: 12),
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(text: l10n.eolDate(eolDate)),
+                  if (_isEstimated)
+                    TextSpan(
+                      text: '  ${l10n.estimated}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.w500,
+                        color: colors.warning,
+                      ),
+                    ),
+                ],
+              ),
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w500,
+                color: onSurface,
+              ),
+            ),
+          ],
+          if (percent != null) ...[
+            const SizedBox(height: 16),
+            LifecycleBar(
+              percent: percent,
+              color: colors.forLevel(_statusLevel()),
+              ended: _status == EolStatus.eol,
+              todayLabel: l10n.today,
+              startLabel: _formatShortDate(_releaseDateRaw, locale) ?? '',
+              endLabel: _formatShortDate(_eolDateRaw, locale) ?? '',
+            ),
+          ],
+          if (_status != EolStatus.unknown) ...[
+            const SizedBox(height: 8),
+            TextButton.icon(
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                visualDensity: VisualDensity.compact,
+              ),
+              onPressed: _addToCalendar,
+              icon: const Icon(Icons.calendar_today, size: 16),
+              label: Text(l10n.addToCalendar),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   @override
@@ -379,28 +549,7 @@ class _HomePageState extends State<HomePage> {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context);
 
-    String statusText;
-    Color? statusColor;
-    switch (_status) {
-      case EolStatus.unchecked:
-        statusText = l10n.tapToCheck;
-        statusColor = null;
-      case EolStatus.loading:
-        statusText = l10n.checkingStatus;
-        statusColor = null;
-      case EolStatus.updated:
-        statusText = l10n.statusUpdated;
-        statusColor = Colors.green;
-      case EolStatus.eolSoon:
-        statusText = l10n.statusEolSoon;
-        statusColor = Colors.amber.shade800;
-      case EolStatus.eol:
-        statusText = l10n.statusEol;
-        statusColor = Colors.red;
-      case EolStatus.unknown:
-        statusText = l10n.statusUnknown;
-        statusColor = Colors.blue;
-    }
+    final buttonColor = _buttonColor(context);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.appTitle)),
@@ -477,139 +626,62 @@ class _HomePageState extends State<HomePage> {
                   height: 200,
                   child: GestureDetector(
                     onTap: _status == EolStatus.loading ? null : _checkEol,
-                    child: Container(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            _buttonColor().withValues(alpha: 1.0),
-                            _buttonColor().withValues(alpha: 0.7),
+                            buttonColor,
+                            Color.lerp(buttonColor, Colors.black, 0.18)!,
                           ],
                         ),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          width: 4,
+                        ),
                         boxShadow: [
-                          // Primary shadow (bottom-right for depth)
                           BoxShadow(
-                            color: _buttonColor().withValues(alpha: 0.5),
-                            blurRadius: 15,
-                            offset: const Offset(8, 8),
-                            spreadRadius: 2,
-                          ),
-                          // Highlight shadow (top-left for light effect)
-                          BoxShadow(
-                            color: Colors.white.withValues(alpha: 0.3),
-                            blurRadius: 10,
-                            offset: const Offset(-5, -5),
-                            spreadRadius: 0,
-                          ),
-                          // Ambient shadow for elevation
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                            spreadRadius: 5,
+                            color: buttonColor.withValues(alpha: 0.35),
+                            blurRadius: 24,
+                            offset: const Offset(0, 12),
                           ),
                         ],
                       ),
                       child: Center(
                         child: _status == EolStatus.loading
                             ? const CircularProgressIndicator(color: Colors.white)
-                            : Text(
-                                _brand.isNotEmpty
-                                    ? (kDebugMode && _debugModel != null ? _debugModel! : null) ?? _deviceLabel ?? l10n.deviceName(_brand, _model)
-                                    : '...',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black26,
-                                      blurRadius: 2,
-                                      offset: Offset(1, 1),
-                                    ),
-                                  ],
+                            : Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Text(
+                                  _displayName(l10n),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 17,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  statusText,
-                  style: TextStyle(color: statusColor),
+                const SizedBox(height: 28),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    child: _buildResultCard(context, l10n, locale),
+                  ),
                 ),
-                if (_eolDateRaw != null) ...[
-                  const SizedBox(height: 4),
-                  Text(l10n.eolDate(_formatDateLocale(_eolDateRaw, locale)!)),
-                ],
-                if (_isEstimated) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    '(${l10n.estimated})',
-                    style: const TextStyle(
-                      fontStyle: FontStyle.italic,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ],
-                if (_status != EolStatus.unchecked &&
-                    _status != EolStatus.loading &&
-                    _status != EolStatus.unknown) ...[
-                  const SizedBox(height: 16),
-                  if (_checkingImage) ...[
-                    const SizedBox(
-                      width: 300,
-                      height: 100,
-                      child: Center(
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ] else if (_timelineImageExists && _buildTimelineImageUrl() != null) ...[
-                    Image.network(
-                      _buildTimelineImageUrl()!,
-                      width: 300,
-                      height: 100,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        debugPrint('Error loading timeline image: $error');
-                        return const SizedBox.shrink();
-                      },
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const SizedBox(
-                          width: 300,
-                          height: 100,
-                          child: Center(
-                            child: SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  TextButton.icon(
-                    onPressed: _addToCalendar,
-                    icon: const Icon(Icons.calendar_today),
-                    label: Text(l10n.addToCalendar),
-                  ),
-                ],
                 const SizedBox(height: 32),
                 Text(
                   l10n.exploreMobile,
                   textAlign: TextAlign.center,
+                  style: TextStyle(color: StatusColors.of(context).muted),
                 ),
                 const SizedBox(height: 8),
                 FilledButton.icon(

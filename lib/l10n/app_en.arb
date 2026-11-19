@@ -24,5 +24,6 @@
     }
   },
   "estimated": "estimated",
-  "addToCalendar": "Add to calendar"
+  "addToCalendar": "Add to calendar",
+  "today": "Today"
 }

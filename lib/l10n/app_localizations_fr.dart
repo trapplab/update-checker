@@ -53,4 +53,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get addToCalendar => 'Ajouter au calendrier';
+
+  @override
+  String get today => 'Aujourd\'hui';
 }

@@ -53,4 +53,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addToCalendar => 'Add to calendar';
+
+  @override
+  String get today => 'Today';
 }
