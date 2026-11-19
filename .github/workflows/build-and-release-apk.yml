@@ -17,10 +17,17 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
       - name: Configure Flutter Environment
         run: |
           export PUB_CACHE=$(pwd)/.pub-cache
           ./flutter/bin/flutter config --no-analytics
+          ./flutter/bin/flutter config --jdk-dir="$JAVA_HOME"
 
       - name: Flutter Doctor
         id: flutter_doctor
@@ -126,10 +133,17 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
       - name: Configure Flutter Environment
         run: |
           export PUB_CACHE=$(pwd)/.pub-cache
           ./flutter/bin/flutter config --no-analytics
+          ./flutter/bin/flutter config --jdk-dir="$JAVA_HOME"
 
       - name: Flutter Doctor
         run: |
