@@ -30,7 +30,7 @@ This simple App checks the date when your mobiles update ends (end of life). You
 ./scripts/prepare_flavor.sh github
 
 # 2. Run the app
-flutter run --flavor github
+flutter/bin/flutter run --flavor github
 ```
 
 ## Using a Local Flutter SDK
@@ -69,7 +69,7 @@ This ensures all developers and CI use the identical SDK version. The `prepare_f
 |---|---|---|
 | `github` | `pubspec.fdroid.yaml` | GitHub Releases distribution |
 | `fdroid` | `pubspec.fdroid.yaml` | F-Droid distribution |
-| `play` | `pubspec.play.yaml` | Google Play (includes `in_app_purchase`) |
+| `play` | `pubspec.play.yaml` | Google Play |
 
 ### Prepare and build
 

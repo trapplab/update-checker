@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class BrandColors {
   static const brand50 = Color(0xFFEEF7FC);

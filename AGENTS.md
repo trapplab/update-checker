@@ -8,7 +8,7 @@ The app can be built with three flavors:
 
 * **Github**: Contains all features, checks for updates on the Github release page.
 * **F-Droid**: Contains all features, gets updates from the F-Droid store.
-* **Google Play**: Gets updates from the Google Play Store. `pubspec.play.yaml` includes `in_app_purchase`.
+* **Google Play**: Gets updates from the Google Play Store.
 
 ## Bump Version
 1. Bump `version:` with version string and version code (MAJOR * 10000 + MINOR * 100 + PATCH) e.g. `version: 0.2.0+200` in:

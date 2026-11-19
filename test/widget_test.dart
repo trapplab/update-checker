@@ -1,6 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'
+    hide GlobalCupertinoLocalizations, GlobalMaterialLocalizations;
+import 'package:material_ui/material_ui.dart';
 import 'package:update_checker/l10n/app_localizations.dart';
 import 'package:update_checker/main.dart';
 
