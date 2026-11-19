@@ -1,0 +1,4 @@
+## Hinzugefügt
+- Lebenszyklus-Leiste zeigt den Support-Status des Geräts
+## Geändert
+- Überarbeitete Oberfläche und Bedienung mit neuem App-Design

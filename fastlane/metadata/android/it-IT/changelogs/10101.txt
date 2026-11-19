@@ -1,0 +1,4 @@
+## Aggiunto
+- Barra del ciclo di vita che mostra lo stato del supporto del dispositivo
+## Modificato
+- Interfaccia ed esperienza riprogettate con un nuovo tema

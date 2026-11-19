@@ -12,6 +12,12 @@
 
 # Changelog
 
+## [1.1.1]
+### Added
+- Lifecycle bar showing device support status
+### Changed
+- Redesigned UI and UX with new app theme
+
 ## [1.1.0]
 ### Added
 - Lifecycle bar showing device support status

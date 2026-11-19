@@ -1,0 +1,4 @@
+## Ajouté
+- Barre de cycle de vie indiquant l'état du support de l'appareil
+## Modifié
+- Interface et ergonomie repensées avec un nouveau thème
