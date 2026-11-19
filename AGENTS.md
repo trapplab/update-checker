@@ -23,6 +23,7 @@ The app can be built with three flavors:
    * __Fixed__ for any bug fixes.
    * __Security__ in case of vulnerabilities.
 3. Changelog entries shall have a maximum of 500 characters in total.
+4. Regenerate `pubspec.lock` with the pinned SDK (`./flutter/bin/flutter pub get`, never the system `flutter`) and verify with `./flutter/bin/flutter pub get --enforce-lockfile`. F-Droid builds fail otherwise.
 
 ## Security
 * Never commit API keys or secrets

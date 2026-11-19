@@ -29,6 +29,13 @@ jobs:
           ./flutter/bin/flutter config --no-analytics
           ./flutter/bin/flutter config --jdk-dir="$JAVA_HOME"
 
+      - name: Verify pubspec.lock (as F-Droid does)
+        run: |
+          export PUB_CACHE=$(pwd)/.pub-cache
+          cp pubspec.fdroid.yaml pubspec.yaml
+          ./flutter/bin/flutter pub get --enforce-lockfile
+          git checkout pubspec.yaml
+
       - name: Flutter Doctor
         id: flutter_doctor
         run: |

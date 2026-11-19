@@ -36,6 +36,19 @@ git diff --cached --name-only | grep -qE "pubspec" && {
   echo "Pubspec version consistency check passed ($PLAY_VERSION)"
 }
 
+# Check pubspec.lock matches the pinned Flutter SDK (F-Droid builds with --enforce-lockfile)
+git diff --cached --name-only | grep -qE "^(pubspec|flutter$)" && {
+  echo "Checking pubspec.lock against pinned Flutter SDK..."
+
+  if ! ./flutter/bin/flutter pub get --enforce-lockfile > /dev/null 2>&1; then
+    echo "pubspec.lock is out of date for the pinned Flutter SDK!"
+    echo "  Run './flutter/bin/flutter pub get' (not the system flutter) and stage pubspec.lock."
+    exit 1
+  fi
+
+  echo "pubspec.lock check passed"
+}
+
 # Generate changelog files when Changelog.md is staged
 if git diff --cached --name-only | grep -q "Changelog.md"; then
   LATEST_VERSION=$(grep -m 1 "## \[" Changelog.md | sed 's/## \[\(.*\)\]/\1/')
