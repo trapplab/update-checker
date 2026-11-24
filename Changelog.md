@@ -12,6 +12,13 @@
 
 # Changelog
 
+## [1.1.2]
+### Added
+- Link to search 1000mobiles.com when a device is not in the database
+### Changed
+- Improved lookup for unclear device models
+- Updated dependencies
+
 ## [1.1.1]
 ### Added
 - Lifecycle bar showing device support status

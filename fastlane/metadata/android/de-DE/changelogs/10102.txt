@@ -1,0 +1,5 @@
+## Hinzugefügt
+- Link zur Suche auf 1000mobiles.com, wenn ein Gerät nicht in der Datenbank ist
+## Geändert
+- Verbesserte Suche bei unklaren Gerätemodellen
+- Abhängigkeiten aktualisiert

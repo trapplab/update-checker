@@ -1,0 +1,5 @@
+## Añadido
+- Enlace para buscar en 1000mobiles.com cuando un dispositivo no está en la base de datos
+## Cambiado
+- Búsqueda mejorada para modelos de dispositivo poco claros
+- Dependencias actualizadas
