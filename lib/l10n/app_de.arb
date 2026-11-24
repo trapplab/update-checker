@@ -27,5 +27,9 @@
   "today": "Heute",
   "yourDevice": "Dein Gerät",
   "checkNow": "Update-Status prüfen",
-  "checkAgain": "Erneut prüfen"
+  "checkAgain": "Erneut prüfen",
+  "statusNotFound": "Noch nicht in unserer Datenbank",
+  "notFoundHint": "Für dieses Gerät haben wir noch keine Update-Informationen. Alle {manufacturer}-Geräte findest du auf unserer Website.",
+  "notFoundHintUnsupported": "Diesen Hersteller decken wir noch nicht ab. Alle unterstützten Geräte findest du auf unserer Website.",
+  "searchOnWebsite": "Auf 1000mobiles.com suchen"
 }

@@ -205,6 +205,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check again'**
   String get checkAgain;
+
+  /// No description provided for @statusNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in our database yet'**
+  String get statusNotFound;
+
+  /// No description provided for @notFoundHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We don\'t have update information for this device yet. Browse all {manufacturer} devices on our website.'**
+  String notFoundHint(String manufacturer);
+
+  /// No description provided for @notFoundHintUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'We don\'t cover this manufacturer yet. Browse all supported devices on our website.'**
+  String get notFoundHintUnsupported;
+
+  /// No description provided for @searchOnWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Search on 1000mobiles.com'**
+  String get searchOnWebsite;
 }
 
 class _AppLocalizationsDelegate

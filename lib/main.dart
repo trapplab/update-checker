@@ -20,7 +20,7 @@ void main() {
   runApp(const ThousandMobilesApp());
 }
 
-enum EolStatus { unchecked, loading, updated, eolSoon, eol, unknown }
+enum EolStatus { unchecked, loading, updated, eolSoon, eol, notFound, unknown }
 
 class ThousandMobilesApp extends StatelessWidget {
   const ThousandMobilesApp({super.key});
@@ -54,7 +54,9 @@ class ThousandMobilesApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, this.httpClient});
+
+  final http.Client? httpClient;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -71,10 +73,17 @@ const _debugTestModels = [
   'V2309A',      // vivo X90 Pro
 ];
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
+  static const _recheckInterval = Duration(hours: 6);
+
   String _brand = '';
+  String _manufacturer = '';
+  String _device = '';
   String _model = '';
   String? _deviceLabel;
+  String? _identifiedName;
+  String? _searchQuery;
+  DateTime? _lastCheck;
   EolStatus _status = EolStatus.unchecked;
   String? _eolDateRaw;
   String? _releaseDateRaw;
@@ -86,8 +95,27 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadDeviceInfo();
     if (AppConfig.isGitHubRelease) _checkForAppUpdate();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    final needsRecheck = _status == EolStatus.notFound || _status == EolStatus.unknown;
+    final lastCheck = _lastCheck;
+    if (needsRecheck &&
+        lastCheck != null &&
+        DateTime.now().difference(lastCheck) >= _recheckInterval) {
+      _checkEol();
+    }
   }
 
   Future<void> _checkForAppUpdate() async {
@@ -132,6 +160,8 @@ class _HomePageState extends State<HomePage> {
       debugPrint('hardware: ${info.hardware}');
       setState(() {
         _brand = info.brand;
+        _manufacturer = info.manufacturer;
+        _device = info.device;
         _model = info.model;
       });
     } catch (_) {
@@ -153,7 +183,10 @@ class _HomePageState extends State<HomePage> {
 
     debugPrint('HTTP GET: $url');
 
-    final response = await http.get(url, headers: headers);
+    final client = widget.httpClient;
+    final response = client != null
+        ? await client.get(url, headers: headers)
+        : await http.get(url, headers: headers);
 
     debugPrint('Response status: ${response.statusCode}');
     debugPrint('Response body: ${response.body}');
@@ -164,18 +197,33 @@ class _HomePageState extends State<HomePage> {
   Future<void> _checkEol() async {
     if (_brand.isEmpty || _model.isEmpty) return;
 
-    setState(() => _status = EolStatus.loading);
+    setState(() {
+      _status = EolStatus.loading;
+      _identifiedName = null;
+      _searchQuery = null;
+    });
+    _lastCheck = DateTime.now();
 
     try {
-      // Use the new /api/model/eol endpoint with model parameter
-      final modelToCheck = kDebugMode && (_debugModel?.isNotEmpty ?? false)
-          ? _debugModel!
-          : _model;
-      final url = Uri.parse(
-        '${AppConfig.apiBaseUrl}/api/model/eol?model=${Uri.encodeQueryComponent(modelToCheck)}',
-      );
+      final usesDebugModel = kDebugMode && (_debugModel?.isNotEmpty ?? false);
+      final modelToCheck = usesDebugModel ? _debugModel! : _model;
+      // brand/manufacturer/device let the server resolve ambiguous model codes
+      // (e.g. "A10" is used by Samsung and several other brands).
+      final params = <String, String>{
+        'model': modelToCheck,
+        if (!usesDebugModel && _brand.isNotEmpty) 'brand': _brand,
+        if (!usesDebugModel && _manufacturer.isNotEmpty) 'manufacturer': _manufacturer,
+        if (!usesDebugModel && _device.isNotEmpty) 'device': _device,
+      };
+      final url = Uri.parse('${AppConfig.apiBaseUrl}/api/model/eol')
+          .replace(queryParameters: params);
 
       final response = await _authenticatedGet(url);
+
+      if (response.statusCode == 404) {
+        _handleNotFound(response.body);
+        return;
+      }
 
       if (response.statusCode != 200) {
         setState(() {
@@ -258,10 +306,39 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _handleNotFound(String body) {
+    String? identified;
+    String? searchQuery;
+    try {
+      final decoded = jsonDecode(body);
+      final data = decoded is Map<String, dynamic> ? decoded['data'] : null;
+      if (data is Map<String, dynamic>) {
+        final manufacturer = data['manufacturer'] as String?;
+        final name = data['identifiedName'] as String?;
+        searchQuery = data['searchQuery'] as String?;
+        if (name != null && name.isNotEmpty) {
+          identified = manufacturer == null ||
+                  name.toLowerCase().startsWith(manufacturer.toLowerCase())
+              ? name
+              : '$manufacturer $name';
+        }
+      }
+    } catch (_) {}
+    setState(() {
+      _status = EolStatus.notFound;
+      _eolDateRaw = null;
+      _releaseDateRaw = null;
+      _isEstimated = false;
+      _identifiedName = identified;
+      _searchQuery = searchQuery;
+    });
+  }
+
   StatusLevel _statusLevel() {
     switch (_status) {
       case EolStatus.unchecked:
       case EolStatus.loading:
+      case EolStatus.notFound:
       case EolStatus.unknown:
         return StatusLevel.unknown;
       case EolStatus.eol:
@@ -292,6 +369,17 @@ class _HomePageState extends State<HomePage> {
     const supportedLanguages = {'de', 'it', 'fr', 'es'};
     final path = supportedLanguages.contains(languageCode) ? '/$languageCode' : '';
     final url = Uri.parse('${AppConfig.apiBaseUrl}$path');
+    await launchUrl(url, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _openWebsiteSearch(BuildContext context) async {
+    final languageCode = Localizations.localeOf(context).languageCode;
+    const supportedLanguages = {'de', 'it', 'fr', 'es'};
+    final path = supportedLanguages.contains(languageCode) ? '/$languageCode' : '';
+    final url = Uri.parse('${AppConfig.apiBaseUrl}$path/').replace(queryParameters: {
+      if (_searchQuery != null && _searchQuery!.isNotEmpty) 'search': _searchQuery!,
+      'legacy': 'true',
+    });
     await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 
@@ -339,7 +427,7 @@ class _HomePageState extends State<HomePage> {
   String _displayName(AppLocalizations l10n) {
     if (_brand.isEmpty) return '…';
     if (kDebugMode && _debugModel != null) return _debugModel!;
-    return _deviceLabel ?? l10n.deviceName(_brand, _model);
+    return _deviceLabel ?? _identifiedName ?? l10n.deviceName(_brand, _model);
   }
 
   bool get _hasResult =>
@@ -356,6 +444,8 @@ class _HomePageState extends State<HomePage> {
         return (tone: colors.warning, icon: Icons.error_rounded, text: l10n.statusEolSoon);
       case EolStatus.updated:
         return (tone: colors.success, icon: Icons.check_circle_rounded, text: l10n.statusUpdated);
+      case EolStatus.notFound:
+        return (tone: colors.muted, icon: Icons.search_off_rounded, text: l10n.statusNotFound);
       case EolStatus.unknown:
       case EolStatus.unchecked:
       case EolStatus.loading:
@@ -490,6 +580,17 @@ class _HomePageState extends State<HomePage> {
                         color: Color.lerp(visuals.tone, theme.colorScheme.onSurface, 0.3),
                       ),
                     ),
+                    if (_status == EolStatus.notFound) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        _searchQuery != null
+                            ? l10n.notFoundHint(_searchQuery!)
+                            : l10n.notFoundHintUnsupported,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
                     if (eolDate != null) ...[
                       const SizedBox(height: 4),
                       Text.rich(
@@ -532,7 +633,28 @@ class _HomePageState extends State<HomePage> {
         const SizedBox(height: 12),
         Divider(height: 1, color: colors.cardBorder),
         const SizedBox(height: 8),
-        if (_status == EolStatus.unknown)
+        if (_status == EolStatus.notFound)
+          Row(
+            children: [
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton.icon(
+                    onPressed: () => _openWebsiteSearch(context),
+                    icon: const Icon(Icons.travel_explore_rounded, size: 18),
+                    label: Text(l10n.searchOnWebsite, overflow: TextOverflow.ellipsis),
+                  ),
+                ),
+              ),
+              IconButton(
+                color: colors.muted,
+                tooltip: l10n.checkAgain,
+                onPressed: _checkEol,
+                icon: const Icon(Icons.refresh_rounded, size: 20),
+              ),
+            ],
+          )
+        else if (_status == EolStatus.unknown)
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: TextButton.icon(
@@ -658,6 +780,7 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _debugModel = value;
           _deviceLabel = null;
+          _identifiedName = null;
           _status = EolStatus.unchecked;
         });
       },
@@ -674,6 +797,7 @@ class _HomePageState extends State<HomePage> {
           onChanged: (value) => setState(() {
             _debugModel = value.isEmpty ? null : value;
             _deviceLabel = null;
+            _identifiedName = null;
             _status = EolStatus.unchecked;
           }),
           onSubmitted: (_) => onSubmitted(),

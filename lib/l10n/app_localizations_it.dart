@@ -62,4 +62,19 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get checkAgain => 'Verifica di nuovo';
+
+  @override
+  String get statusNotFound => 'Non ancora nel nostro database';
+
+  @override
+  String notFoundHint(String manufacturer) {
+    return 'Non abbiamo ancora informazioni sugli aggiornamenti per questo dispositivo. Scopri tutti i dispositivi $manufacturer sul nostro sito.';
+  }
+
+  @override
+  String get notFoundHintUnsupported =>
+      'Non copriamo ancora questo produttore. Scopri tutti i dispositivi supportati sul nostro sito.';
+
+  @override
+  String get searchOnWebsite => 'Cerca su 1000mobiles.com';
 }

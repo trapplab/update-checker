@@ -27,5 +27,9 @@
   "today": "Aujourd'hui",
   "yourDevice": "Votre appareil",
   "checkNow": "Vérifier le statut des mises à jour",
-  "checkAgain": "Vérifier à nouveau"
+  "checkAgain": "Vérifier à nouveau",
+  "statusNotFound": "Pas encore dans notre base de données",
+  "notFoundHint": "Nous n'avons pas encore d'informations de mise à jour pour cet appareil. Parcourez tous les appareils {manufacturer} sur notre site.",
+  "notFoundHintUnsupported": "Nous ne couvrons pas encore ce fabricant. Parcourez tous les appareils pris en charge sur notre site.",
+  "searchOnWebsite": "Rechercher sur 1000mobiles.com"
 }
